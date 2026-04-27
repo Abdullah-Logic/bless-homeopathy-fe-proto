@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import {
   PhoneCall,
@@ -202,15 +203,14 @@ const About = () => {
               and lived to the age of 101!
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-6">
-              <button
-                type="button"
-                data-under-development="true"
+              <Link
+                href="/contact-us"
                 className="inline-flex items-center gap-3 rounded-xl bg-[#E12454] px-6 py-3 text-[14px] font-semibold text-white transition hover:bg-[#E12454]/90"
               >
                 Get Appointment
                 <span className="text-white/90">|</span>
                 <span className="text-[18px] leading-none">+</span>
-              </button>
+              </Link>
               <div className="inline-flex items-center gap-2 text-lg font-bold text-[#2a4a66]">
                 <span className="text-[#E12454]">
                   <PhoneCall size={30} />
@@ -361,15 +361,14 @@ const About = () => {
             We&apos;ve 25 Years of experience in Medical Services.
           </p>
           <div className="mt-8 flex justify-center">
-            <button
-              type="button"
-              data-under-development="true"
+            <Link
+              href="/contact-us"
               className="inline-flex items-center gap-3 rounded-xl bg-[#E12454] px-8 py-3.5 text-[14px] font-semibold text-white shadow-[0_12px_28px_rgba(225,36,84,0.35)] transition hover:bg-[#E12454]/90"
             >
               Contact Us
               <span className="text-white/90">|</span>
               <span className="text-[18px] leading-none">+</span>
-            </button>
+            </Link>
           </div>
         </div>
       </section>

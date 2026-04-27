@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   ArrowRight,
@@ -37,6 +38,8 @@ import {
   Package,
   Tag,
 } from "lucide-react";
+import { clinicInfo } from "@/lib/shopData";
+import { articles } from "@/lib/articlesData";
 
 const HERO_IMAGES = [
   "/home/header-bg-1.svg",
@@ -65,16 +68,6 @@ type ProductCardData = {
   oldPrice: string;
   off: string;
   rating: string;
-  imageSrc: string;
-};
-
-type BlogCardData = {
-  tag: string;
-  title: string;
-  description: string;
-  date: string;
-  readTime: string;
-  author: string;
   imageSrc: string;
 };
 
@@ -143,6 +136,30 @@ const testimonials = [
   {
     name: "Melissa T.",
     text: "My 7-year-old was constantly suffering from allergies, and nothing seemed to help. After our first consultation at Bless Homeopathy, we saw a noticeable improvement. The natural remedies are gentle yet effective, and I feel confident knowing they're safe for my child.",
+  },
+];
+
+const successStories = [
+  {
+    patient: "Sushmanth T.",
+    focus: "Hair loss",
+    plan: "8 sessions",
+    quote:
+      "I'm really happy with the treatment-it made a meaningful difference in my confidence alongside supportive homeopathic care.",
+  },
+  {
+    patient: "Martha P.",
+    focus: "Seasonal allergies",
+    plan: "6 sessions",
+    quote:
+      "Symptoms that used to disrupt my day now stay controlled, and I feel more energetic and comfortable throughout the season.",
+  },
+  {
+    patient: "Liam R.",
+    focus: "Digestive discomfort",
+    plan: "10 sessions",
+    quote:
+      "The personalized plan was easy to follow and gave me steady improvement without harsh side effects.",
   },
 ];
 
@@ -294,39 +311,6 @@ const products: ProductCardData[] = [
   },
 ];
 
-const blogPosts: BlogCardData[] = [
-  {
-    tag: "Treatment Insights",
-    title: "Understanding Homeopathic Remedies for Chronic Conditions",
-    description:
-      "Discover how homeopathy addresses chronic health issues by treating the root cause rather than just symptoms, offering long-term relief naturally.",
-    date: "April 15, 2026",
-    readTime: "5 min read",
-    author: "Dr. Rajesh Sharma",
-    imageSrc: "/home/wellness1.svg",
-  },
-  {
-    tag: "Mental Health",
-    title: "Natural Solutions for Stress and Anxiety Management",
-    description:
-      "Learn about gentle, effective homeopathic approaches to managing stress and anxiety without side effects, restoring your emotional balance.",
-    date: "April 10, 2026",
-    readTime: "6 min read",
-    author: "Dr. Priya Mehta",
-    imageSrc: "/home/wellness2.svg",
-  },
-  {
-    tag: "Pediatric Care",
-    title: "Homeopathy for Children: Safe and Gentle Care",
-    description:
-      "Explore how homeopathic medicine provides safe, gentle, and effective treatment for common childhood ailments without harsh chemicals.",
-    date: "April 5, 2026",
-    readTime: "4 min read",
-    author: "Dr. Anil Kumar",
-    imageSrc: "/home/wellness3.svg",
-  },
-];
-
 export default function HomePage() {
   const [activeServiceFilter, setActiveServiceFilter] =
     useState("All Services");
@@ -334,6 +318,7 @@ export default function HomePage() {
     useState("All Products");
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [heroIndex, setHeroIndex] = useState(0);
+  const [successStoryIndex, setSuccessStoryIndex] = useState(0);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -371,14 +356,14 @@ export default function HomePage() {
               <p className="mt-5 max-w-120 text-[18px] font-semibold leading-snug">
                 We&apos;ve 25 Years of experience in Homeopathic Services.
               </p>
-              <button
-                type="button"
+              <Link
+                href="/our-services"
                 className="mt-8 inline-flex items-center gap-3 rounded-xl bg-[#E12454] px-7 py-3.5 text-[14px] font-semibold text-white shadow-[0_12px_28px_rgba(225,36,84,0.35)] transition hover:bg-[#E12454]/90"
               >
                 Our Services
                 <span className="text-white/90">|</span>
                 <span className="text-[18px] leading-none">+</span>
-              </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -414,13 +399,13 @@ export default function HomePage() {
                 </div>
                 <div className="h-[0.5px] w-full sm:h-full sm:w-[0.5px] bg-[#063E60] flex items-center justify-center" />
                 <div className="flex shrink-0 items-center">
-                  <button
-                    type="button"
+                  <Link
+                    href="/contact-us"
                     className="inline-flex items-center gap-2 text-[12px] font-semibold text-[#063E60]"
                   >
                     {action}
                     <ArrowRight className="h-4 w-4" />
-                  </button>
+                  </Link>
                 </div>
               </div>
             ))}
@@ -470,19 +455,19 @@ export default function HomePage() {
               and lived to the age of 101!
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-6">
-              <button
-                type="button"
+              <Link
+                href="/contact-us"
                 className="inline-flex items-center gap-3 rounded-xl bg-[#E12454] px-6 py-3 text-[14px] font-semibold text-white transition hover:bg-[#E12454]/90"
               >
                 Get Appointment
                 <span className="text-white/90">|</span>
                 <span className="text-[18px] leading-none">+</span>
-              </button>
+              </Link>
               <div className="inline-flex items-center gap-2 text-lg font-bold text-[#2a4a66]">
                 <span className="text-[#E12454]">
                   <PhoneCall size={30} />
                 </span>
-                604 (613) 8111
+                <a href={clinicInfo.phoneHref}>{clinicInfo.phoneDisplay}</a>
               </div>
             </div>
           </div>
@@ -581,13 +566,13 @@ export default function HomePage() {
                         <Clock3 className="h-3.5 w-3.5" />
                         {service.duration}
                       </div>
-                      <button
-                        type="button"
+                      <Link
+                        href="/our-services"
                         className="inline-flex items-center gap-1 text-[12px] font-semibold text-[#6ba86a]"
                       >
                         Learn More
                         <ArrowRight className="h-3.5 w-3.5" />
-                      </button>
+                      </Link>
                     </div>
                   </div>
                 </article>
@@ -611,13 +596,13 @@ export default function HomePage() {
             </div>
             <div className="flex flex-col items-center gap-2 text-[13px] sm:justify-end">
               <span className="text-[#7a8592]">Need help choosing?</span>
-              <button
-                type="button"
+              <Link
+                href="/contact-us"
                 className="inline-flex items-center gap-1 font-bold text-[#EC4899]"
               >
                 Consult Our Experts
                 <ArrowRight className="h-3.5 w-3.5" />
-              </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -667,25 +652,40 @@ export default function HomePage() {
               </p>
               <div className="mb-2 space-y-1 text-[13px] leading-6 text-[#2a2d31]">
                 <p>
-                  Patient — <span className="font-semibold">Sushmanth T.</span>
+                  Patient —{" "}
+                  <span className="font-semibold">
+                    {successStories[successStoryIndex].patient}
+                  </span>
                 </p>
                 <p>
-                  Focus — <span className="font-semibold">Hair loss</span>
+                  Focus —{" "}
+                  <span className="font-semibold">
+                    {successStories[successStoryIndex].focus}
+                  </span>
                 </p>
                 <p>
-                  Plan — <span className="font-semibold">8 sessions</span>
+                  Plan —{" "}
+                  <span className="font-semibold">
+                    {successStories[successStoryIndex].plan}
+                  </span>
                 </p>
               </div>
               <p className="text-[14px] leading-[1.7] text-[#4b535b]">
-                I&apos;m really happy with the treatment—it made a meaningful
-                difference in my confidence alongside supportive homeopathic
-                care.
+                {successStories[successStoryIndex].quote}
               </p>
               <div className="mt-7 flex justify-end gap-2">
                 {[ChevronLeft, ChevronRight].map((Icon, index) => (
                   <button
                     key={index}
                     type="button"
+                    onClick={() =>
+                      setSuccessStoryIndex((prev) =>
+                        index === 0
+                          ? (prev - 1 + successStories.length) %
+                            successStories.length
+                          : (prev + 1) % successStories.length,
+                      )
+                    }
                     className="flex h-10 w-10 items-center justify-center rounded-full border border-[#0273AE] text-[#0273AE]"
                   >
                     <Icon className="h-4 w-4" />
@@ -696,13 +696,13 @@ export default function HomePage() {
           </div>
 
           <div className="mt-10 text-center">
-            <button
-              type="button"
+            <Link
+              href="/about-us"
               className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#0273AE] bg-white px-6 py-3 text-[13px] font-semibold text-[#0273AE] transition hover:border-[#0273AE]/70"
             >
               View all success stories
               <ArrowRight className="h-4 w-4" />
-            </button>
+            </Link>
             <p className="mt-3">
               Explore all our patients transformation journeys and get inspired
             </p>
@@ -788,14 +788,14 @@ export default function HomePage() {
             We&apos;ve 25 Years of experience in Medical Services.
           </p>
           <div className="mt-8 flex justify-center">
-            <button
-              type="button"
+            <Link
+              href="/contact-us"
               className="inline-flex items-center gap-3 rounded-xl bg-[#E12454] px-8 py-3.5 text-[14px] font-semibold text-white shadow-[0_12px_28px_rgba(225,36,84,0.35)] transition hover:bg-[#E12454]/90"
             >
               Contact Us
               <span className="text-white/90">|</span>
               <span className="text-[18px] leading-none">+</span>
-            </button>
+            </Link>
           </div>
         </div>
       </section>
@@ -942,13 +942,13 @@ export default function HomePage() {
                   className="w-full rounded-[0.625rem] border border-[#e4eaee] bg-white px-4 py-3 text-[13px] text-[#243a5f] outline-none placeholder:text-[#aeb8c2] focus:border-[#8fb47e] focus:ring-2 focus:ring-[#8fb47e]/25"
                 />
               </div>
-              <button
-                type="button"
+              <a
+                href={clinicInfo.phoneHref}
                 className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-[0.625rem] bg-[#E12454] px-6 py-3.5 text-[14px] font-semibold text-white shadow-[0_12px_28px_rgba(225,36,84,0.28)] transition hover:bg-[#E12454]/90"
               >
                 <CalendarDays className="h-4 w-4" />
                 Get appointment
-              </button>
+              </a>
             </div>
 
             <div className="flex flex-col gap-6">
@@ -1181,13 +1181,13 @@ export default function HomePage() {
           </div>
 
           <div className="mt-10 text-center">
-            <button
-              type="button"
+            <Link
+              href="/products"
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#E12454] px-6 py-3 text-[13px] font-semibold text-white shadow-[0_12px_28px_rgba(225,36,84,0.28)] transition hover:bg-[#E12454]/90"
             >
               View all products
               <ArrowRight className="h-4 w-4" />
-            </button>
+            </Link>
           </div>
         </div>
       </section>
@@ -1207,7 +1207,7 @@ export default function HomePage() {
           </div>
 
           <div className="mt-12 grid gap-8 md:grid-cols-2 xl:grid-cols-3">
-            {blogPosts.map((post) => (
+            {articles.map((post) => (
               <article
                 key={post.title}
                 className="flex flex-col overflow-hidden rounded-2xl bg-white shadow-[0_14px_28px_rgba(32,49,77,0.08)] ring-1 ring-[#edf0f3]"
@@ -1243,13 +1243,13 @@ export default function HomePage() {
                       </span>
                       {post.author}
                     </div>
-                    <button
-                      type="button"
+                    <Link
+                      href={`/articles/${post.slug}`}
                       className="inline-flex items-center gap-2 text-[12px] font-semibold text-[#6ba86a]"
                     >
                       Read more
                       <ArrowRight className="h-3.5 w-3.5" />
-                    </button>
+                    </Link>
                   </div>
                 </div>
               </article>
@@ -1257,13 +1257,13 @@ export default function HomePage() {
           </div>
 
           <div className="mt-10 text-center">
-            <button
-              type="button"
+            <Link
+              href="/articles"
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#E12454] px-6 py-3 text-[13px] font-semibold text-white shadow-[0_12px_28px_rgba(225,36,84,0.28)] transition hover:bg-[#E12454]/90"
             >
               View all articles
               <ArrowRight className="h-4 w-4" />
-            </button>
+            </Link>
           </div>
         </div>
       </section>

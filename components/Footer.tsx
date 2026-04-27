@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { Mail, MapPin, Phone } from "lucide-react";
-import { FaPinterestP } from "react-icons/fa";
-import { FiFacebook, FiInstagram, FiLinkedin } from "react-icons/fi";
+import { FiFacebook, FiInstagram } from "react-icons/fi";
+import { FaXTwitter, FaYoutube } from "react-icons/fa6";
 import Link from "next/link";
 
 const quickLinks = [
@@ -13,10 +13,33 @@ const quickLinks = [
 ];
 
 const footerBadges = [
-  "Privacy Statement",
-  "Mission Statement",
-  "Code of Conduct",
-  "Equity Statement",
+  { label: "Privacy Statement", href: "/privacy-statement" },
+  { label: "Mission Statement", href: "/mission-statement" },
+  { label: "Code of Conduct", href: "/code-of-conduct" },
+  { label: "Equity Statement", href: "/equity-statement" },
+];
+
+const socialLinks = [
+  {
+    label: "Facebook",
+    href: "https://www.facebook.com/Blesshomeo?mibextid=ZbWKwL",
+    icon: FiFacebook,
+  },
+  {
+    label: "Instagram",
+    href: "https://www.instagram.com/homeopathic.doctor?igsh=MWRibWVvdjhpZXcwYQ%3D%3D",
+    icon: FiInstagram,
+  },
+  {
+    label: "X",
+    href: "https://x.com/BHomeopathy?t=1Z-wBNMcLIhMaic3DesQHw&s=08",
+    icon: FaXTwitter,
+  },
+  {
+    label: "YouTube",
+    href: "https://www.youtube.com/@blesshomeopathyclinic9181",
+    icon: FaYoutube,
+  },
 ];
 
 const Footer = () => {
@@ -71,19 +94,20 @@ const Footer = () => {
             </Link>
           ))}
           <p className="pt-4 text-[11px] text-white/55">
-            © 2026 Bless Homeopathy. All Rights Reserved.
+            © Dr Nasreen 2024 | All Right Reserved
           </p>
         </div>
 
         <div className="space-y-6">
           <div className="flex flex-wrap gap-3">
             {footerBadges.map((item) => (
-              <div
-                key={item}
-                className="flex h-14 min-w-24 flex-1 items-center justify-center bg-[#8FB569] px-2 text-center text-[10px] font-semibold uppercase leading-3 sm:flex-none"
+              <Link
+                key={item.label}
+                href={item.href}
+                className="flex h-14 min-w-24 flex-1 items-center justify-center bg-[#8FB569] px-2 text-center text-[10px] font-semibold uppercase leading-3 sm:flex-none hover:bg-[#7ea257]"
               >
-                {item}
-              </div>
+                {item.label}
+              </Link>
             ))}
             <div className="flex h-14 min-w-24 flex-1 items-center justify-center bg-[#BFD3DC] p-1 text-[#243646] sm:w-25 sm:flex-none">
               <div className="border bg-white border-[#BFD3DC] px-3 py-1 text-center text-[8px] font-bold leading-tight">
@@ -97,42 +121,18 @@ const Footer = () => {
           </div>
 
           <div className="flex gap-5 text-white">
-            <a
-              href="https://facebook.com"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Facebook"
-              className="hover:text-[#8FB569]"
-            >
-              <FiFacebook size={17} />
-            </a>
-            <a
-              href="https://instagram.com"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Instagram"
-              className="hover:text-[#8FB569]"
-            >
-              <FiInstagram size={17} />
-            </a>
-            <a
-              href="https://pinterest.com"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Pinterest"
-              className="hover:text-[#8FB569]"
-            >
-              <FaPinterestP size={17} />
-            </a>
-            <a
-              href="https://linkedin.com"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="LinkedIn"
-              className="hover:text-[#8FB569]"
-            >
-              <FiLinkedin size={17} />
-            </a>
+            {socialLinks.map(({ label, href, icon: Icon }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={label}
+                className="hover:text-[#8FB569]"
+              >
+                <Icon size={17} />
+              </a>
+            ))}
           </div>
         </div>
       </div>

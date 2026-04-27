@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { clinicInfo } from "@/lib/shopData";
 import {
   Calendar,
   CalendarDays,
@@ -196,14 +196,13 @@ export default function ContactUsPage() {
                   className="w-full rounded-[0.625rem] border border-[#e4eaee] bg-white px-4 py-3 text-[13px] text-[#243a5f] outline-none placeholder:text-[#aeb8c2] focus:border-[#8fb47e] focus:ring-2 focus:ring-[#8fb47e]/25"
                 />
               </div>
-              <button
-                type="button"
-                data-under-development="true"
+              <a
+                href={clinicInfo.phoneHref}
                 className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-[0.625rem] bg-[#E12454] px-6 py-3.5 text-[14px] font-semibold text-white shadow-[0_12px_28px_rgba(225,36,84,0.28)] transition hover:bg-[#E12454]/90"
               >
                 <CalendarDays className="h-4 w-4" />
                 Get appointment
-              </button>
+              </a>
             </div>
 
             <div className="flex flex-col gap-6">

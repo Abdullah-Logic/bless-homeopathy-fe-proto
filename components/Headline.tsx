@@ -1,17 +1,39 @@
 "use client";
 
 import { Mail, MapPin, Clock } from "lucide-react";
-import { FiFacebook, FiLinkedin } from "react-icons/fi";
-import { FaXTwitter } from "react-icons/fa6";
+import { FiFacebook, FiInstagram } from "react-icons/fi";
+import { FaXTwitter, FaYoutube } from "react-icons/fa6";
 import { useState } from "react";
+import { clinicInfo } from "@/lib/shopData";
 
 const info = [
-  { icon: Mail, text: "info@blesshomeopathy.com" },
-  { icon: MapPin, text: "14D Street Brooklyn, New York" },
-  { icon: Clock, text: "Office Hours: 10:00am - 07:00pm" },
+  { icon: Mail, text: clinicInfo.email },
+  { icon: MapPin, text: clinicInfo.address },
+  { icon: Clock, text: `Office Hours: ${clinicInfo.officeHours}` },
 ];
 
-const socials = [FiFacebook, FaXTwitter, FiLinkedin];
+const socialLinks = [
+  {
+    label: "Facebook",
+    href: "https://www.facebook.com/Blesshomeo?mibextid=ZbWKwL",
+    icon: FiFacebook,
+  },
+  {
+    label: "Instagram",
+    href: "https://www.instagram.com/homeopathic.doctor?igsh=MWRibWVvdjhpZXcwYQ%3D%3D",
+    icon: FiInstagram,
+  },
+  {
+    label: "X",
+    href: "https://x.com/BHomeopathy?t=1Z-wBNMcLIhMaic3DesQHw&s=08",
+    icon: FaXTwitter,
+  },
+  {
+    label: "YouTube",
+    href: "https://www.youtube.com/@blesshomeopathyclinic9181",
+    icon: FaYoutube,
+  },
+];
 
 const Headline = () => {
   const [activeInfoIndex, setActiveInfoIndex] = useState<number | null>(null);
@@ -41,7 +63,7 @@ const Headline = () => {
                 setActiveInfoIndex((prev) => (prev === index ? null : index))
               }
               className={`inline-flex transition ${
-                activeInfoIndex === index ? "text-white/50" : "text-white/"
+                activeInfoIndex === index ? "text-white/50" : "text-white/85"
               }`}
               aria-label={text}
               aria-expanded={activeInfoIndex === index}
@@ -61,8 +83,17 @@ const Headline = () => {
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-3 text-white/85">
-          {socials.map((Icon, index) => (
-            <Icon key={index} size={14} />
+          {socialLinks.map(({ label, href, icon: Icon }) => (
+            <a
+              key={label}
+              href={href}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={label}
+              className="hover:text-white"
+            >
+              <Icon size={14} />
+            </a>
           ))}
         </div>
       </div>

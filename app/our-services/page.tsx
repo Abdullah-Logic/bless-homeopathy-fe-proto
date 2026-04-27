@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
 import {
   Activity,
   Brain,
@@ -56,6 +58,8 @@ const serviceDetails = [
 ];
 
 const Services = () => {
+  const [activeServiceFilter, setActiveServiceFilter] = useState("All Services");
+
   return (
     <main className="min-h-screen bg-white text-[#2a3f52]">
       <section className="relative">
@@ -99,15 +103,14 @@ const Services = () => {
               health and overall wellness.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-4 sm:gap-6">
-              <button
-                type="button"
-                data-under-development="true"
+              <Link
+                href="/contact-us"
                 className="inline-flex items-center gap-3 rounded-xl bg-[#E12454] px-7 py-3.5 text-[14px] font-semibold text-white shadow-[0_12px_28px_rgba(225,36,84,0.28)] transition hover:bg-[#E12454]/90"
               >
                 Get Appointment
                 <span className="text-white/90">|</span>
                 <span className="text-[18px] leading-none">+</span>
-              </button>
+              </Link>
               <div className="inline-flex items-center gap-2 text-lg font-bold text-[#2a4a66]">
                 <span className="text-[#E12454]">
                   <PhoneCall size={30} />
@@ -151,13 +154,13 @@ const Services = () => {
           </p>
 
           <div className="mt-7 flex flex-wrap justify-center gap-2.5">
-            {serviceFilters.map((filter, index) => (
+            {serviceFilters.map((filter) => (
               <button
                 key={filter}
                 type="button"
-                data-under-development="true"
+                onClick={() => setActiveServiceFilter(filter)}
                 className={`rounded-2xl px-6 py-2 text-[12px] font-semibold transition ${
-                  index === 0
+                  activeServiceFilter === filter
                     ? "bg-[#6ba86a] text-white shadow-[0_10px_22px_rgba(107,168,106,0.35)]"
                     : "bg-white text-[#54606e] shadow-[0_4px_10px_rgba(0,0,0,0.05)] ring-1 ring-[#edf0f2]"
                 }`}
@@ -229,15 +232,14 @@ const Services = () => {
                 </div>
 
                 {cta ? (
-                  <button
-                    type="button"
-                    data-under-development="true"
+                  <Link
+                    href="/contact-us"
                     className="mt-7 inline-flex items-center gap-3 rounded-xl bg-[#E12454] px-8 py-3.5 text-[14px] font-semibold text-white shadow-[0_12px_28px_rgba(225,36,84,0.28)] transition hover:bg-[#E12454]/90"
                   >
                     Get Appointment
                     <span className="text-white/90">|</span>
                     <span className="text-[18px] leading-none">+</span>
-                  </button>
+                  </Link>
                 ) : null}
               </div>
             </div>
@@ -272,15 +274,14 @@ const Services = () => {
             We&apos;ve 25 Years of experience in Medical Services.
           </p>
           <div className="mt-8 flex justify-center">
-            <button
-              type="button"
-              data-under-development="true"
+            <Link
+              href="/contact-us"
               className="inline-flex items-center gap-3 rounded-xl bg-[#E12454] px-8 py-3.5 text-[14px] font-semibold text-white shadow-[0_12px_28px_rgba(225,36,84,0.35)] transition hover:bg-[#E12454]/90"
             >
               Contact Us
               <span className="text-white/90">|</span>
               <span className="text-[18px] leading-none">+</span>
-            </button>
+            </Link>
           </div>
         </div>
       </section>

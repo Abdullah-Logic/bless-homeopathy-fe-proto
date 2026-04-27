@@ -181,7 +181,6 @@ const shopperAssurances = [
 export default function EcommercePage() {
   const [activeProductFilter, setActiveProductFilter] =
     useState("All Products");
-
   return (
     <main className="min-h-screen bg-white">
       <section className="relative text-white">
@@ -327,7 +326,6 @@ export default function EcommercePage() {
                   </div>
                   <button
                     type="button"
-                    data-under-development="true"
                     className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-md bg-[#E12454] px-3 py-2 text-xs font-semibold tracking-[0.02em] text-white transition hover:bg-[#E12454]/90"
                   >
                     <ShoppingCart className="h-4 w-4" />
@@ -341,7 +339,6 @@ export default function EcommercePage() {
           <div className="mt-10 text-center">
             <button
               type="button"
-              data-under-development="true"
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#E12454] px-6 py-3 text-[13px] font-semibold text-white shadow-[0_12px_28px_rgba(225,36,84,0.28)] transition hover:bg-[#E12454]/90"
             >
               View all products
