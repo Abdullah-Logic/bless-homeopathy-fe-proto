@@ -88,7 +88,7 @@ function NavbarContent({ pathname }: { pathname: string }) {
           <div className="flex items-center gap-2 sm:gap-4">
             <Link
               href="/contact-us#appointment"
-              className="btn-gradient-pink inline-flex items-center gap-1 rounded-lg px-2 py-2 text-[10px] font-semibold text-white transition sm:px-3 sm:text-[12px] lg:hidden"
+              className="btn-gradient-pink inline-flex items-center gap-1 whitespace-nowrap rounded-lg px-2 py-2 text-[10px] leading-none font-semibold text-white transition sm:px-3 sm:text-[12px] lg:hidden"
             >
               Get Appointment
               <span className="text-white/90">+</span>
