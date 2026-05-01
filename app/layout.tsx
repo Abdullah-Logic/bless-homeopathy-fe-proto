@@ -11,6 +11,19 @@ import FreeConsultationPopup from "@/components/FreeConsultationPopup";
 export const metadata: Metadata = {
   title: "Homeo Health - Your Health Management Platform",
   description: "Professional health management and wellness platform",
+  manifest: "/favicon/manifest.json",
+  icons: {
+    icon: [
+      { url: "/favicon/favicon.ico" },
+      { url: "/favicon/icon1.png", type: "image/png" },
+      { url: "/favicon/icon0.svg", type: "image/svg+xml" },
+    ],
+    apple: [{ url: "/favicon/apple-icon.png", type: "image/png" }],
+    shortcut: ["/favicon/favicon.ico"],
+  },
+  appleWebApp: {
+    title: "BlessHomeo",
+  },
 };
 
 export default function RootLayout({

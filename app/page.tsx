@@ -304,6 +304,7 @@ export default function HomePage() {
         theme: "light",
         cssVarsPerTheme: {
           light: { "cal-brand": "#5E7348" },
+          dark: { "cal-brand": "#5E7348" },
         },
         hideEventTypeDetails: false,
         layout: "month_view",
@@ -1076,7 +1077,7 @@ export default function HomePage() {
                 style={{ width: "100%", height: "100%", overflow: "hidden" }}
                 config={{
                   layout: "month_view",
-                  useSlotsViewOnSmallScreen: true,
+                  useSlotsViewOnSmallScreen: "true",
                   theme: "light",
                 }}
               />

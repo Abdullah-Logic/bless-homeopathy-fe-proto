@@ -52,6 +52,7 @@ export default function ContactUsPage() {
         theme: "light",
         cssVarsPerTheme: {
           light: { "cal-brand": "var(--brand-green)" },
+          dark: { "cal-brand": "var(--brand-green)" },
         },
         hideEventTypeDetails: false,
         layout: "month_view",
@@ -173,7 +174,7 @@ export default function ContactUsPage() {
                 style={{ width: "100%", height: "100%", overflow: "hidden" }}
                 config={{
                   layout: "month_view",
-                  useSlotsViewOnSmallScreen: true,
+                  useSlotsViewOnSmallScreen: "true",
                   theme: "light",
                 }}
               />
