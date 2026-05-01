@@ -1,3 +1,5 @@
+import PageHero from "@/components/PageHero";
+
 const privacySections = [
   {
     title: "Information We Collect",
@@ -36,24 +38,12 @@ const privacySections = [
 export default function PrivacyStatementPage() {
   return (
     <main className="min-h-screen bg-white text-[#2a3f52]">
-      <section className="relative">
-        <div className="relative min-h-[min(280px,40vh)] w-full overflow-hidden bg-[#7BB153]">
-          <div className="relative z-10 mx-auto flex min-h-[min(280px,40vh)] max-w-325 items-center justify-center px-4 py-10 text-center sm:px-6 lg:px-8">
-            <div className="flex max-w-170 flex-col items-center text-white">
-              <p className="text-sm font-medium text-white">
-                Home {">"} Privacy Statement
-              </p>
-              <h1 className="mt-4 text-[30px] font-black uppercase leading-[1.08] tracking-[-0.03em] sm:text-[40px] lg:text-[46px]">
-                Privacy Statement
-              </h1>
-              <p className="mx-auto mt-4 max-w-135 text-[16px] font-medium leading-snug">
-                We value trust and transparency in how your personal information
-                is handled.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      <PageHero
+        breadcrumb="Home > Privacy Statement"
+        title="Privacy Statement"
+        description="We value trust and transparency in how your personal information is handled."
+        compact
+      />
 
       <section className="bg-white px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-250">

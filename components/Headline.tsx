@@ -39,7 +39,7 @@ const Headline = () => {
   const [activeInfoIndex, setActiveInfoIndex] = useState<number | null>(null);
 
   return (
-    <section className="bg-[#7BB153] px-4 py-2 text-sm text-white md:px-6">
+    <section className="bg-[linear-gradient(92deg,#5e7348_0%,#6b8453_45%,#5e7348_100%)] px-4 py-2 text-sm text-white md:px-6">
       <div className="mx-auto flex w-full max-w-330 items-center justify-between gap-3 overflow-hidden">
         <div className="hidden min-w-0 items-center gap-x-4 whitespace-nowrap sm:flex">
           {info.map(({ icon: Icon, text }, index) => (
@@ -82,7 +82,7 @@ const Headline = () => {
             </p>
           </div>
         </div>
-        <div className="flex shrink-0 items-center gap-3 text-white/85">
+        <div className="flex shrink-0 items-center gap-2.5 text-white/85">
           {socialLinks.map(({ label, href, icon: Icon }) => (
             <a
               key={label}
@@ -90,7 +90,7 @@ const Headline = () => {
               target="_blank"
               rel="noreferrer"
               aria-label={label}
-              className="hover:text-white"
+              className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/8 hover:bg-white/15 hover:text-white"
             >
               <Icon size={14} />
             </a>

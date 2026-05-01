@@ -2,11 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import Cal, { getCalApi } from "@calcom/embed-react";
+import { useEffect, useRef, useState } from "react";
+import { parseMoneyLabel, useCart } from "@/components/cart/CartProvider";
 import {
   ArrowRight,
   Baby,
-  CalendarDays,
   Check,
   ChevronLeft,
   ChevronRight,
@@ -23,9 +24,7 @@ import {
   Star,
   Stethoscope,
   Truck,
-  UserPlus,
   Users,
-  Atom,
   PhoneCall,
   Shield,
   Quote,
@@ -37,9 +36,12 @@ import {
   Calendar,
   Package,
   Tag,
+  Briefcase,
+  CalendarPlus,
 } from "lucide-react";
 import { clinicInfo } from "@/lib/shopData";
-import { articles } from "@/lib/articlesData";
+import type { WPArticleView } from "@/lib/wpArticles";
+import type { WPServiceView } from "@/lib/wpServices";
 
 const HERO_IMAGES = [
   "/home/header-bg-1.svg",
@@ -47,18 +49,8 @@ const HERO_IMAGES = [
   "/home/header-bg-3.svg",
 ];
 
-type ServiceCardData = {
-  tag: string;
-  title: string;
-  provider: string;
-  description: string;
-  badges: string[];
-  duration: string;
-  imageSrc: string;
-  titleNote?: string;
-};
-
 type ProductCardData = {
+  id: number;
   badge?: string;
   badgeClass?: string;
   stockLabel: string;
@@ -69,6 +61,7 @@ type ProductCardData = {
   off: string;
   rating: string;
   imageSrc: string;
+  categories: string[];
 };
 
 const serviceFilters = [
@@ -88,53 +81,20 @@ const productFilters = [
   "Wellness",
 ];
 
-const services: ServiceCardData[] = [
-  {
-    tag: "Popular",
-    title: "Acute Consultation and Medication",
-    provider: "Bless Homeopathy",
-    description:
-      "Immediate relief for acute conditions with personalized homeopathic remedies tailored to your symptoms.",
-    badges: ["Quick Relief", "Natural Solutions", "No Side Effects"],
-    duration: "30-45 mins",
-    imageSrc: "/home/service1.svg",
-  },
-  {
-    tag: "Recommended",
-    title: "Adult First Consultation and Medication",
-    provider: "Bless Homeopathy",
-    description:
-      "Comprehensive initial assessment and customized treatment plan for adult patients with chronic or acute conditions.",
-    badges: ["Complete Assessment", "Custom Treatment", "Follow-up Care"],
-    duration: "60-90 mins",
-    imageSrc: "/home/service2.svg",
-  },
-  {
-    tag: "Family Care",
-    title: "Kids 10 and Under",
-    titleNote: "(First consultation and medication)",
-    provider: "Bless Homeopathy",
-    description:
-      "Gentle, safe homeopathic care designed specifically for children, addressing common childhood ailments naturally.",
-    badges: ["Child-Friendly", "Safe & Gentle", "Parent Guidance"],
-    duration: "45-60 mins",
-    imageSrc: "/home/service3.svg",
-  },
-];
-
-const SERVICE_ICONS = [Stethoscope, Users, Baby] as const;
-
 const testimonials = [
   {
     name: "Jessica L.",
+    highlight: "Immune Support",
     text: "My son was always getting sick, and I wanted a natural solution. Bless Homeopathy was the answer. The remedies have strengthened his immune system, and he's been healthier than ever. Dr. Nasreen is amazing with kids!",
   },
   {
     name: "Sarah M.",
+    highlight: "Anxiety Treatment",
     text: "After struggling with anxiety for years, I was skeptical about trying homeopathy. But Dr. Nasreen's personalized approach and care made a huge difference. The remedies have been life-changing, giving me peace of mind without any side effects.",
   },
   {
     name: "Melissa T.",
+    highlight: "Childhood Allergies",
     text: "My 7-year-old was constantly suffering from allergies, and nothing seemed to help. After our first consultation at Bless Homeopathy, we saw a noticeable improvement. The natural remedies are gentle yet effective, and I feel confident knowing they're safe for my child.",
   },
 ];
@@ -208,108 +168,40 @@ const faqs = [
     answer:
       "Homeopathic remedies are generally gentle and commonly used across age groups when selected carefully as part of an appropriate treatment plan.",
   },
+  {
+    question: "04. What conditions can homeopathy support?",
+    answer:
+      "Homeopathy is often used to support a wide range of concerns, including allergies, digestive discomfort, stress-related symptoms, skin issues, and recurring seasonal problems. Your practitioner will assess your case individually before recommending a plan.",
+  },
+  {
+    question: "05. How often are follow-up visits needed?",
+    answer:
+      "Follow-up frequency depends on your condition, response to treatment, and goals. Some patients need closer short-term reviews, while others move to wider check-ins once progress becomes stable.",
+  },
+  {
+    question: "06. Do you offer consultations for children and seniors?",
+    answer:
+      "Yes. Care is available for different age groups, including children and seniors, with treatment plans adapted to age, health history, and individual sensitivity.",
+  },
 ];
 
-const products: ProductCardData[] = [
-  {
-    badge: "Bestseller",
-    badgeClass: "bg-[#E12454] text-white",
-    stockLabel: "In Stock",
-    title: "Arnica Montana 200CH",
-    description:
-      "Effective for trauma, bruises, muscle soreness, and post-surgical recovery.",
-    price: "$299",
-    oldPrice: "$399",
-    off: "25% OFF",
-    rating: "4.8 (245)",
-    imageSrc: "/ecommerce/product-01.jpg",
-  },
-  {
-    stockLabel: "In Stock",
-    title: "Immune Boost Formula",
-    description:
-      "Natural immunity enhancer with Echinacea and Thuja complex for strong defense.",
-    price: "$549",
-    oldPrice: "$699",
-    off: "21% OFF",
-    rating: "4.9 (389)",
-    imageSrc: "/ecommerce/product-02.jpg",
-  },
-  {
-    badge: "Popular",
-    badgeClass: "bg-[#E12454] text-white",
-    stockLabel: "In Stock",
-    title: "Stress Relief Complex",
-    description:
-      "Gentle homeopathic blend for anxiety, stress, and emotional balance.",
-    price: "$449",
-    oldPrice: "$549",
-    off: "18% OFF",
-    rating: "4.7 (178)",
-    imageSrc: "/ecommerce/product-03.jpg",
-  },
-  {
-    badge: "New",
-    badgeClass: "bg-[#E12454] text-white",
-    stockLabel: "In Stock",
-    title: "Rhus Tox 30CH",
-    description:
-      "Relief for joint pain, arthritis, and rheumatic conditions naturally.",
-    price: "$249",
-    oldPrice: "$329",
-    off: "24% OFF",
-    rating: "4.6 (156)",
-    imageSrc: "/ecommerce/product-04.jpg",
-  },
-  {
-    badge: "Bestseller",
-    badgeClass: "bg-[#E12454] text-white",
-    stockLabel: "In Stock",
-    title: "Digestive Wellness Kit",
-    description:
-      "Complete digestive support with Nux Vomica, Lycopodium, and Carbo Veg.",
-    price: "$799",
-    oldPrice: "$999",
-    off: "20% OFF",
-    rating: "4.9 (412)",
-    imageSrc: "/ecommerce/product-05.jpg",
-  },
-  {
-    stockLabel: "In Stock",
-    title: "Pulsatilla 200CH",
-    description:
-      "Women's health remedy for hormonal balance and menstrual wellness.",
-    price: "$349",
-    oldPrice: "$449",
-    off: "22% OFF",
-    rating: "4.8 (267)",
-    imageSrc: "/ecommerce/product-06.jpg",
-  },
-  {
-    badge: "Popular",
-    badgeClass: "bg-[#E12454] text-white",
-    stockLabel: "In Stock",
-    title: "Children's Health Kit",
-    description:
-      "Safe and gentle remedies for common childhood ailments and immunity.",
-    price: "$649",
-    oldPrice: "$799",
-    off: "19% OFF",
-    rating: "4.9 (523)",
-    imageSrc: "/ecommerce/product-07.jpg",
-  },
-  {
-    stockLabel: "In Stock",
-    title: "Sleep Support Formula",
-    description:
-      "Natural sleep aid with Coffea Cruda and Passiflora for restful nights.",
-    price: "$399",
-    oldPrice: "$499",
-    off: "20% OFF",
-    rating: "4.7 (198)",
-    imageSrc: "/ecommerce/product-08.jpg",
-  },
-];
+const FALLBACK_PRODUCTS: ProductCardData[] = [];
+
+const getServiceAudience = (serviceTitle: string) => {
+  const normalized = serviceTitle.toLowerCase();
+  if (normalized.includes("kids") || normalized.includes("child"))
+    return "Kids";
+  return "Adults";
+};
+
+const pickServiceIcon = (service: WPServiceView) => {
+  const categories = service.categories.map((category) => category.toLowerCase());
+  if (categories.includes("infants") || categories.includes("kids")) return Baby;
+  if (categories.includes("women")) return HeartPulse;
+  if (categories.includes("men")) return UserCheck;
+  if (categories.includes("seniors")) return Users;
+  return Stethoscope;
+};
 
 export default function HomePage() {
   const [activeServiceFilter, setActiveServiceFilter] =
@@ -319,6 +211,57 @@ export default function HomePage() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [heroIndex, setHeroIndex] = useState(0);
   const [successStoryIndex, setSuccessStoryIndex] = useState(0);
+  const [testimonialIndex, setTestimonialIndex] = useState(0);
+  const { addItem, lastAddedItemId } = useCart();
+  const [services, setServices] = useState<WPServiceView[]>([]);
+  const [isLoadingServices, setIsLoadingServices] = useState(true);
+  const [servicesError, setServicesError] = useState("");
+  const [products, setProducts] =
+    useState<ProductCardData[]>(FALLBACK_PRODUCTS);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+  const [productsError, setProductsError] = useState("");
+  const blogCarouselRef = useRef<HTMLDivElement | null>(null);
+  const [canScrollBlogsLeft, setCanScrollBlogsLeft] = useState(false);
+  const [canScrollBlogsRight, setCanScrollBlogsRight] = useState(false);
+
+  const [wpArticles, setWpArticles] = useState<WPArticleView[]>([]);
+  const [isLoadingWpArticles, setIsLoadingWpArticles] = useState(true);
+  const [wpArticlesError, setWpArticlesError] = useState<string | null>(null);
+  const visibleServices = services.filter((service) => {
+    if (activeServiceFilter === "All Services") return true;
+    const normalizedCategories = service.categories.map((category) =>
+      category.toLowerCase(),
+    );
+    const audience = getServiceAudience(service.title);
+    if (activeServiceFilter === "Kids" || activeServiceFilter === "Infants") {
+      return (
+        normalizedCategories.includes("kids") ||
+        normalizedCategories.includes("infants") ||
+        audience === "Kids"
+      );
+    }
+    if (
+      activeServiceFilter === "Women" ||
+      activeServiceFilter === "Men" ||
+      activeServiceFilter === "Seniors"
+    ) {
+      return (
+        normalizedCategories.includes(activeServiceFilter.toLowerCase()) ||
+        normalizedCategories.includes("adults") ||
+        audience === "Adults"
+      );
+    }
+    return true;
+  });
+  const visibleProducts = products
+    .filter((product) => {
+      if (activeProductFilter === "All Products") return true;
+      return product.categories.some(
+        (category) =>
+          category.toLowerCase() === activeProductFilter.toLowerCase(),
+      );
+    })
+    .slice(0, 4);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -327,6 +270,151 @@ export default function HomePage() {
 
     return () => window.clearInterval(timer);
   }, []);
+
+  const scrollBlogs = (direction: "left" | "right") => {
+    const container = blogCarouselRef.current;
+    if (!container) return;
+    const amount = container.clientWidth * 0.92;
+    container.scrollBy({
+      left: direction === "left" ? -amount : amount,
+      behavior: "smooth",
+    });
+  };
+
+  const updateBlogScrollButtons = () => {
+    const container = blogCarouselRef.current;
+    if (!container) return;
+    const maxLeft = container.scrollWidth - container.clientWidth;
+    setCanScrollBlogsLeft(container.scrollLeft > 4);
+    setCanScrollBlogsRight(container.scrollLeft < maxLeft - 4);
+  };
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setTestimonialIndex((prev) => (prev + 1) % testimonials.length);
+    }, 5000);
+
+    return () => window.clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const cal = await getCalApi({ namespace: "30min" });
+      cal("ui", {
+        theme: "light",
+        cssVarsPerTheme: {
+          light: { "cal-brand": "#5E7348" },
+        },
+        hideEventTypeDetails: false,
+        layout: "month_view",
+      });
+    })();
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadServices() {
+      try {
+        setIsLoadingServices(true);
+        setServicesError("");
+        const response = await fetch("/api/services?perPage=50", {
+          signal: controller.signal,
+        });
+        if (!response.ok) {
+          throw new Error("Could not load services");
+        }
+        const data = (await response.json()) as WPServiceView[];
+        setServices(data);
+      } catch (error) {
+        if ((error as Error).name !== "AbortError") {
+          setServicesError(
+            "We are unable to load services right now.",
+          );
+          setServices([]);
+        }
+      } finally {
+        setIsLoadingServices(false);
+      }
+    }
+
+    loadServices();
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadProducts() {
+      try {
+        setIsLoadingProducts(true);
+        setProductsError("");
+        const response = await fetch("/api/products", {
+          signal: controller.signal,
+        });
+        if (!response.ok) {
+          throw new Error("Could not load homepage products");
+        }
+        const data = (await response.json()) as ProductCardData[];
+        setProducts(data);
+      } catch (error) {
+        if ((error as Error).name !== "AbortError") {
+          setProductsError(
+            "We are unable to load products right now. Please try again shortly.",
+          );
+          setProducts(FALLBACK_PRODUCTS);
+        }
+      } finally {
+        setIsLoadingProducts(false);
+      }
+    }
+
+    loadProducts();
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadArticles() {
+      try {
+        setIsLoadingWpArticles(true);
+        setWpArticlesError(null);
+        const res = await fetch("/api/wp-articles?perPage=50", {
+          signal: controller.signal,
+        });
+        if (!res.ok) {
+          throw new Error("Could not load articles");
+        }
+        const data = (await res.json()) as WPArticleView[];
+        setWpArticles(data);
+      } catch (e) {
+        if ((e as Error).name !== "AbortError") {
+          setWpArticlesError(
+            (e as Error).message || "We are unable to load articles right now.",
+          );
+          setWpArticles([]);
+        }
+      } finally {
+        setIsLoadingWpArticles(false);
+      }
+    }
+
+    loadArticles();
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    updateBlogScrollButtons();
+    window.addEventListener("resize", updateBlogScrollButtons);
+    return () => window.removeEventListener("resize", updateBlogScrollButtons);
+  }, [wpArticles.length, isLoadingWpArticles]);
+
+  useEffect(() => {
+    const container = blogCarouselRef.current;
+    if (!container || wpArticles.length === 0) return;
+    container.scrollLeft = container.scrollWidth / 3;
+  }, [wpArticles.length]);
 
   return (
     <main className="min-h-screen bg-white text-[#2a3f52]">
@@ -357,10 +445,10 @@ export default function HomePage() {
                 We&apos;ve 25 Years of experience in Homeopathic Services.
               </p>
               <Link
-                href="/our-services"
-                className="mt-8 inline-flex items-center gap-3 rounded-xl bg-[#E12454] px-7 py-3.5 text-[14px] font-semibold text-white shadow-[0_12px_28px_rgba(225,36,84,0.35)] transition hover:bg-[#E12454]/90"
+                href="/contact-us#appointment"
+                className="btn-gradient-pink mt-8 inline-flex items-center gap-3 rounded-xl px-7 py-3.5 text-[14px] font-semibold text-white transition"
               >
-                Our Services
+                Contact Us
                 <span className="text-white/90">|</span>
                 <span className="text-[18px] leading-none">+</span>
               </Link>
@@ -369,39 +457,49 @@ export default function HomePage() {
         </div>
 
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center px-4">
-          <div className="pointer-events-auto grid w-full max-w-290 grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6 translate-y-[42%] sm:translate-y-1/2">
+          <div className="pointer-events-auto grid w-full max-w-290 grid-cols-1 gap-3 translate-y-[38%] sm:translate-y-1/2 lg:grid-cols-2 lg:gap-6">
             {[
               {
-                title: "Memberships",
-                subtitle: "See our membership options",
+                title: "Get Appointment",
+                subtitle: "Get a free first consultation.",
                 action: "Learn More",
-                icon: UserPlus,
+                icon: CalendarPlus,
+                href: "/contact-us#appointment",
               },
               {
-                title: "Join Our Mission",
-                subtitle: "Donate to educate",
-                action: "Donate Now",
-                icon: Atom,
+                title: "Our Services",
+                subtitle: "Explore the solutions we offer",
+                action: "Learn More",
+                icon: Briefcase,
+                href: "/our-services",
               },
-            ].map(({ title, subtitle, action, icon: Icon }) => (
+            ].map(({ title, subtitle, action, icon: Icon, href }) => (
               <div
                 key={title}
-                className="flex flex-col overflow-hidden rounded-2xl bg-white shadow-[0_16px_44px_rgba(15,35,68,0.16)] sm:flex-row justify-between px-6 py-5"
+                className="flex flex-row items-center justify-between gap-3 overflow-hidden rounded-xl bg-white px-4 py-3.5 shadow-[0_10px_28px_rgba(15,35,68,0.15)] sm:rounded-2xl sm:px-6 sm:py-5 sm:shadow-[0_16px_44px_rgba(15,35,68,0.16)]"
               >
-                <div className="flex items-center gap-4">
-                  <div className="text-[#8FB569]">
-                    <Icon size={50} strokeWidth={1.5} />
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="text-(--brand-green)">
+                    <Icon
+                      size={36}
+                      strokeWidth={1.6}
+                      className="sm:h-12 sm:w-12"
+                    />
                   </div>
-                  <div className="min-w-0 text-[#8FB569]">
-                    <h3 className="text-2xl">{title}</h3>
-                    <p className="mt-1 text-sm">{subtitle}</p>
+                  <div className="min-w-0 text-(--brand-green)">
+                    <h3 className="text-[18px] leading-tight sm:text-2xl">
+                      {title}
+                    </h3>
+                    <p className="mt-0.5 text-[12px] sm:mt-1 sm:text-sm">
+                      {subtitle}
+                    </p>
                   </div>
                 </div>
-                <div className="h-[0.5px] w-full sm:h-full sm:w-[0.5px] bg-[#063E60] flex items-center justify-center" />
+                <div className="flex h-10 w-[0.5px] items-center justify-center bg-[#063E60]/70" />
                 <div className="flex shrink-0 items-center">
                   <Link
-                    href="/contact-us"
-                    className="inline-flex items-center gap-2 text-[12px] font-semibold text-[#063E60]"
+                    href={href}
+                    className="inline-flex items-center gap-2 text-[12px] font-semibold text-[#063E60] sm:text-[13px]"
                   >
                     {action}
                     <ArrowRight className="h-4 w-4" />
@@ -413,7 +511,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-white px-4 pb-20 pt-52 sm:px-6 lg:px-8 lg:pt-32">
+      <section className="bg-white px-4 pb-20 pt-50 sm:px-6 lg:px-8 lg:pt-32">
         <div className="mx-auto grid max-w-295 gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
           <div className="relative mx-auto w-full max-w-140 lg:mx-0">
             <div className="relative aspect-5/4 w-full overflow-hidden">
@@ -427,8 +525,8 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="max-w-140 lg:justify-self-end relative">
-            <p className="text-[11rem] font-bold tracking-widest text-transparent bg-clip-text bg-linear-to-b from-[#F1F2F3] via-[#F1F2F3]/30 to-transparent absolute left-1/2 -translate-x-1/2 -top-25">
+          <div className="max-w-140 lg:justify-self-end relative isolate">
+            <p className="pointer-events-none -z-10 select-none text-[11rem] font-bold tracking-widest text-transparent bg-clip-text bg-linear-to-b from-[#F1F2F3] via-[#F1F2F3]/45 to-transparent absolute left-1/2 -translate-x-1/2 -top-25">
               About
             </p>
             <h2 className="mt-3 text-[28px] font-bold leading-tight tracking-[-0.03em] sm:text-[36px] text-[#E12454]">
@@ -456,8 +554,8 @@ export default function HomePage() {
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-6">
               <Link
-                href="/contact-us"
-                className="inline-flex items-center gap-3 rounded-xl bg-[#E12454] px-6 py-3 text-[14px] font-semibold text-white transition hover:bg-[#E12454]/90"
+                href="/contact-us#appointment"
+                className="btn-gradient-pink inline-flex items-center gap-3 rounded-xl px-6 py-3 text-[14px] font-semibold text-white transition"
               >
                 Get Appointment
                 <span className="text-white/90">|</span>
@@ -474,10 +572,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-linear-to-r from-[#DBEAFE] to-[#E9FED3] px-4 py-20 sm:px-6 lg:px-8">
+      <section className="bg-[radial-gradient(circle_at_15%_15%,#ffffff_0%,#f2f8ff_24%,transparent_45%),linear-gradient(120deg,#dcecff_0%,#eff7ff_45%,#e7f8dc_100%)] px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-295">
           <div className="text-center">
-            <div className="inline-flex items-center gap-2 rounded-full bg-[#FDF2F8] px-4 py-1.75 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#EC4899]">
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#FDF2F8] px-4 py-1.75 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#EC4899] ring-1 ring-[#f8d8e8] shadow-[0_8px_18px_rgba(236,72,153,0.16)]">
               <Star className="h-3 w-3 text-[#EC4899]" />
               Our Services
             </div>
@@ -501,7 +599,7 @@ export default function HomePage() {
                   onClick={() => setActiveServiceFilter(filter)}
                   className={`rounded-2xl px-6 py-2 text-[12px] font-semibold transition ${
                     active
-                      ? "bg-[#6ba86a] text-white shadow-[0_10px_22px_rgba(107,168,106,0.35)]"
+                      ? "bg-(--brand-green) text-white shadow-[0_10px_22px_rgba(94,115,72,0.35)]"
                       : "bg-white text-[#54606e] shadow-[0_4px_10px_rgba(0,0,0,0.05)] ring-1 ring-[#edf0f2]"
                   }`}
                 >
@@ -512,12 +610,22 @@ export default function HomePage() {
           </div>
 
           <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {services.map((service, index) => {
-              const Icon = SERVICE_ICONS[index];
+            {servicesError ? (
+              <p className="md:col-span-2 xl:col-span-3 text-center text-[14px] text-[#d93025]">
+                {servicesError}
+              </p>
+            ) : null}
+            {isLoadingServices ? (
+              <p className="md:col-span-2 xl:col-span-3 text-center text-[14px] text-[#5a6876]">
+                Loading services...
+              </p>
+            ) : null}
+            {visibleServices.map((service, index) => {
+              const Icon = pickServiceIcon(service);
               return (
                 <article
                   key={service.title}
-                  className="flex flex-col overflow-hidden rounded-[1.125rem] bg-white shadow-[0_16px_36px_rgba(19,40,70,0.08)]"
+                  className="flex flex-col overflow-hidden rounded-[1.125rem] border border-white/70 bg-[linear-gradient(180deg,#ffffff_0%,#f9fcff_100%)] backdrop-blur-[2px] shadow-[0_20px_44px_rgba(19,40,70,0.14)]"
                 >
                   <div className="relative h-50 bg-[#f0f4f6]">
                     <Image
@@ -527,12 +635,14 @@ export default function HomePage() {
                       className="object-cover object-center"
                       sizes="(max-width: 1024px) 100vw, 380px"
                     />
-                    <div className="absolute right-3 top-3">
-                      <span className="inline-flex rounded-full bg-white/95 px-3 py-1.5 text-[10px] font-semibold text-[#EC4899] shadow-sm">
-                        {service.tag}
-                      </span>
-                    </div>
-                    <div className="absolute -bottom-5 left-4 flex h-12 w-12 items-center justify-center rounded-full bg-white text-[#4a7eb8] shadow-[0_8px_20px_rgba(27,50,81,0.14)] ring-2 ring-[#a8c8e8]">
+                    {service.tag ? (
+                      <div className="absolute right-3 top-3">
+                        <span className="inline-flex rounded-full bg-white/95 px-3 py-1.5 text-[10px] font-semibold text-[#EC4899] shadow-sm">
+                          {service.tag}
+                        </span>
+                      </div>
+                    ) : null}
+                    <div className="absolute -bottom-5 left-4 flex h-12 w-12 items-center justify-center rounded-full bg-[linear-gradient(145deg,#ffffff_0%,#eef5ff_100%)] text-[#2f5fa3] shadow-[0_10px_24px_rgba(27,50,81,0.2)] ring-2 ring-[#a8c8e8]">
                       <Icon className="h-6 w-6" strokeWidth={1.8} />
                     </div>
                   </div>
@@ -546,29 +656,35 @@ export default function HomePage() {
                       </p>
                     ) : null}
                     <p className="mt-2 text-[13px] font-medium text-[#EC4899]">
-                      {service.provider}
+                      Bless Homeopathy
                     </p>
                     <p className="mt-3 flex-1 text-[14px] leading-[1.65] text-[#596775]">
-                      {service.description}
+                      {service.homeParagraph}
                     </p>
-                    <div className="mt-5 flex flex-wrap gap-2">
-                      {service.badges.map((badge) => (
-                        <span
-                          key={badge}
-                          className="rounded-md bg-[#e8f2fb] px-2.5 py-1.5 text-[11px] font-semibold text-[#1e3d52]"
-                        >
-                          {badge}
-                        </span>
-                      ))}
-                    </div>
+                    {service.badges.length > 0 ? (
+                      <div className="mt-5 flex flex-wrap gap-2">
+                        {service.badges.map((badge) => (
+                          <span
+                            key={badge}
+                            className="rounded-md bg-[#e8f2fb] px-2.5 py-1.5 text-[11px] font-semibold text-[#1e3d52]"
+                          >
+                            {badge}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
                     <div className="mt-6 flex items-center justify-between border-t border-[#eef2f5] pt-4">
                       <div className="flex items-center gap-2 text-[12px] text-[#7b8793]">
-                        <Clock3 className="h-3.5 w-3.5" />
-                        {service.duration}
+                        {service.duration ? (
+                          <>
+                            <Clock3 className="h-3.5 w-3.5" />
+                            {service.duration}
+                          </>
+                        ) : null}
                       </div>
                       <Link
                         href="/our-services"
-                        className="inline-flex items-center gap-1 text-[12px] font-semibold text-[#6ba86a]"
+                        className="inline-flex items-center gap-2 text-[13px] font-semibold text-(--brand-green)"
                       >
                         Learn More
                         <ArrowRight className="h-3.5 w-3.5" />
@@ -580,7 +696,7 @@ export default function HomePage() {
             })}
           </div>
 
-          <div className="mx-auto mt-10 flex w-fit flex-col items-stretch gap-4 rounded-2xl bg-linear-to-r from-[#EFF6FF] to-[#FDF2F8] px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
+          <div className="mx-auto mt-10 flex w-fit flex-col items-stretch gap-4 rounded-2xl border border-white/70 bg-[linear-gradient(100deg,#e7f2ff_0%,#f3f8ff_45%,#fff0f6_100%)] px-6 py-5 shadow-[0_16px_34px_rgba(24,45,75,0.1)] sm:flex-row sm:items-center sm:justify-between sm:gap-8">
             <div className="flex flex-1 items-center gap-4 border-[#e5e9ed] sm:border-r sm:pr-8">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full shadow-md bg-white text-[#1E4A8A]">
                 <Shield className="h-5 w-5" strokeWidth={1.8} />
@@ -597,8 +713,8 @@ export default function HomePage() {
             <div className="flex flex-col items-center gap-2 text-[13px] sm:justify-end">
               <span className="text-[#7a8592]">Need help choosing?</span>
               <Link
-                href="/contact-us"
-                className="inline-flex items-center gap-1 font-bold text-[#EC4899]"
+                href="/contact-us#appointment"
+                className="inline-flex items-center gap-2 text-[14px] font-bold text-[#EC4899]"
               >
                 Consult Our Experts
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -608,10 +724,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-white px-4 py-20 sm:px-6 lg:px-8">
+      <section className="bg-[radial-gradient(circle_at_5%_10%,#fff3f8_0%,transparent_35%),#ffffff] px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-295">
           <div className="text-center">
-            <h2 className="text-[32px] font-bold leading-tight tracking-[-0.04em] sm:text-[44px] text-[#1E4A8A]">
+            <h2 className="text-[32px] font-bold leading-tight tracking-[-0.04em] text-[#1E4A8A] sm:text-[44px]">
               Stories of Hope: Real People, Real Results, Real Joy
             </h2>
             <p className="mx-auto mt-4 max-w-230 text-[14px] leading-[1.7]">
@@ -698,7 +814,7 @@ export default function HomePage() {
           <div className="mt-10 text-center">
             <Link
               href="/about-us"
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#0273AE] bg-white px-6 py-3 text-[13px] font-semibold text-[#0273AE] transition hover:border-[#0273AE]/70"
+              className="btn-gradient-pink inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-[13px] font-semibold text-white transition"
             >
               View all success stories
               <ArrowRight className="h-4 w-4" />
@@ -710,11 +826,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="relative bg-white px-4 py-15 sm:px-6 lg:px-8">
-        <p className="text-[11rem] font-bold tracking-wide text-transparent bg-clip-text bg-linear-to-b from-[#F1F2F3] via-[#F1F2F3]/30 to-transparent absolute left-1/2 -translate-x-1/2 -top-25">
+      <section className="relative isolate bg-[radial-gradient(circle_at_85%_10%,#fff3f7_0%,transparent_38%),#ffffff] px-4 py-15 sm:px-6 lg:px-8">
+        <p className="pointer-events-none -z-10 select-none text-[11rem] font-bold tracking-wide text-transparent bg-clip-text bg-linear-to-b from-[#F1F2F3] via-[#F1F2F3]/45 to-transparent absolute left-1/2 -translate-x-1/2 -top-25">
           Feedback
         </p>
-        <div className="relative mx-auto grid max-w-295 gap-12 lg:grid-cols-[1fr_1.05fr] lg:items-start">
+        <div className="relative mx-auto grid max-w-295 gap-12 lg:grid-cols-[1fr_1.05fr] lg:items-center">
           <div>
             <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#E12454]">
               Our Testimonials
@@ -738,25 +854,85 @@ export default function HomePage() {
               />
             </div>
           </div>
-          <div className="flex flex-col gap-5">
-            {testimonials.map((t) => (
-              <div
-                key={t.name}
-                className="rounded-[0.875rem] border-x border-t border-[#eef1f4] border-b-4 border-b-[#8FB569] bg-white p-6 pb-7 shadow-[0_10px_28px_rgba(28,48,79,0.06)]"
-              >
-                <p className="text-[13px] leading-[1.7] text-[#5c6770]">
-                  {t.text}
-                </p>
-                <div className="mt-5 flex items-center gap-2">
-                  <span>
-                    <Quote className="text-[#E12454] rotate-180" size={25} />
-                  </span>
-                  <span className="text-[15px] font-bold text-[#1e3d52]">
-                    {t.name}
-                  </span>
+          <div className="space-y-5 lg:self-center">
+            <div
+              key={testimonialIndex}
+              className="testimonial-slide-in rounded-[1.25rem] border border-[#e2eaf3] bg-[linear-gradient(180deg,#ffffff_0%,#fbfdff_100%)] p-7 shadow-[0_16px_36px_rgba(28,48,79,0.12)]"
+            >
+              <div className="mb-4 flex gap-1 text-[#F9C747]">
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <Star
+                    key={index}
+                    className="h-4 w-4 fill-current"
+                    strokeWidth={0}
+                  />
+                ))}
+              </div>
+              <p className="text-[17px] leading-[1.8] text-[#5c6770] italic">
+                {testimonials[testimonialIndex].text}
+              </p>
+              <div className="mt-7 flex items-center gap-3">
+                <span className="inline-flex h-13 w-13 items-center justify-center rounded-full bg-linear-to-br from-[#5c1f48] to-[#e12454] text-[20px] font-bold text-white">
+                  {testimonials[testimonialIndex].name
+                    .split(" ")
+                    .map((part) => part[0])
+                    .join("")}
+                </span>
+                <div>
+                  <p className="text-[30px] leading-none font-gamaamli text-[#1e3d52]">
+                    {testimonials[testimonialIndex].name}
+                  </p>
+                  <p className="mt-1 text-[15px] font-semibold text-(--brand-pink)">
+                    {testimonials[testimonialIndex].highlight}
+                  </p>
                 </div>
               </div>
-            ))}
+            </div>
+
+            <div className="carousel-controls flex items-center justify-center gap-5">
+              <button
+                type="button"
+                aria-label="Previous testimonial"
+                onClick={() =>
+                  setTestimonialIndex(
+                    (prev) =>
+                      (prev - 1 + testimonials.length) % testimonials.length,
+                  )
+                }
+                className="flex h-12 w-12 items-center justify-center rounded-full bg-(--brand-pink) text-white shadow-[0_10px_24px_rgba(225,36,84,0.3)] hover:bg-[#c81f4b]"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+
+              <div className="flex items-center gap-2">
+                {testimonials.map((_, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => setTestimonialIndex(index)}
+                    aria-label={`Go to testimonial ${index + 1}`}
+                    className={`h-2.5 rounded-full transition-all duration-300 ${
+                      testimonialIndex === index
+                        ? "w-7 bg-(--brand-pink)"
+                        : "w-2.5 bg-[#d3d9df]"
+                    }`}
+                  />
+                ))}
+              </div>
+
+              <button
+                type="button"
+                aria-label="Next testimonial"
+                onClick={() =>
+                  setTestimonialIndex(
+                    (prev) => (prev + 1) % testimonials.length,
+                  )
+                }
+                className="flex h-12 w-12 items-center justify-center rounded-full bg-(--brand-pink) text-white shadow-[0_10px_24px_rgba(225,36,84,0.3)] hover:bg-[#c81f4b]"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -789,8 +965,8 @@ export default function HomePage() {
           </p>
           <div className="mt-8 flex justify-center">
             <Link
-              href="/contact-us"
-              className="inline-flex items-center gap-3 rounded-xl bg-[#E12454] px-8 py-3.5 text-[14px] font-semibold text-white shadow-[0_12px_28px_rgba(225,36,84,0.35)] transition hover:bg-[#E12454]/90"
+              href="/contact-us#appointment"
+              className="btn-gradient-pink inline-flex items-center gap-3 rounded-xl px-8 py-3.5 text-[14px] font-semibold text-white transition"
             >
               Contact Us
               <span className="text-white/90">|</span>
@@ -802,8 +978,8 @@ export default function HomePage() {
 
       <section className="bg-white px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-295 gap-12 xl:grid-cols-[0.98fr_1.02fr]">
-          <div className="relative">
-            <p className="text-[11rem] font-bold tracking-widest text-transparent bg-clip-text bg-linear-to-b from-[#F1F2F3] via-[#F1F2F3]/30 to-transparent absolute left-1/2 -translate-x-1/2 -top-30">
+          <div className="relative isolate">
+            <p className="pointer-events-none -z-10 select-none text-[11rem] font-bold tracking-widest text-transparent bg-clip-text bg-linear-to-b from-[#F1F2F3] via-[#F1F2F3]/45 to-transparent absolute left-1/2 -translate-x-1/2 -top-30">
               Faqs
             </p>
             <p className="text-[13px] font-semibold uppercase tracking-[0.12em] text-[#E12454]">
@@ -866,7 +1042,7 @@ export default function HomePage() {
                     </span>
                   </button>
                   {open ? (
-                    <div className="border-t border-[#edf1f4] px-5 py-5 text-[14px] leading-[1.7] text-[#6b7783]">
+                    <div className="faq-answer-open border-t border-[#edf1f4] px-5 py-5 text-[14px] leading-[1.7] text-[#6b7783]">
                       {faq.answer}
                     </div>
                   ) : null}
@@ -877,10 +1053,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="relative overflow-hidden px-4 py-20 sm:px-6 lg:px-8 bg-linear-to-r from-[#DBEAFE] to-[#E9FED3]">
+      <section className="relative overflow-hidden px-4 pt-20 pb-10 sm:px-6 lg:px-8 bg-[radial-gradient(circle_at_10%_10%,#ffffff_0%,#ebf4ff_25%,transparent_45%),linear-gradient(120deg,#d6e9ff_0%,#e6f3ff_46%,#dcf5ce_100%)]">
         <div className="relative z-10 mx-auto max-w-295">
           <div className="text-center">
-            <div className="inline-flex items-center gap-2 rounded-full bg-[#FDF2F8] px-4 py-1.75 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#EC4899]">
+            <div className="inline-flex items-center gap-2 rounded-full bg-(--surface-mint) px-4 py-1.75 text-[10px] font-semibold uppercase tracking-[0.18em] text-(--brand-green) ring-1 ring-[#cde8d7] shadow-[0_8px_18px_rgba(94,115,72,0.2)]">
               <Calendar size={15} /> Book appointment
             </div>
             <h2 className="mt-5 text-[32px] font-bold leading-tight tracking-[-0.04em] text-[#1E4A8A] sm:text-[44px]">
@@ -892,67 +1068,22 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="mx-auto mt-12 grid max-w-250 gap-8 xl:grid-cols-[1.12fr_0.88fr]">
-            <div className="rounded-[20px] bg-white p-6 shadow-[0_24px_48px_rgba(30,55,75,0.1)] ring-1 ring-[#e8eef2] sm:p-8">
-              <div className="grid gap-4 sm:grid-cols-2">
-                {[
-                  "Full name *",
-                  "Email *",
-                  "Phone *",
-                  "Service type *",
-                  "Preferred date *",
-                  "Preferred time *",
-                ].map((label, index) => (
-                  <div
-                    key={label}
-                    className={
-                      index === 0 || index === 3 ? "sm:col-span-2" : ""
-                    }
-                  >
-                    <label className="mb-2 block text-[12px] font-semibold text-[#485767]">
-                      {label}
-                    </label>
-                    <input
-                      type="text"
-                      placeholder={
-                        index === 0
-                          ? "Your name"
-                          : index === 1
-                            ? "you@email.com"
-                            : index === 2
-                              ? "604 613 8111"
-                              : index === 3
-                                ? "Select service"
-                                : index === 4
-                                  ? "Pick a date"
-                                  : "Pick a time"
-                      }
-                      className="h-11.5 w-full rounded-[0.625rem] border border-[#e4eaee] bg-white px-4 text-[13px] text-[#243a5f] outline-none placeholder:text-[#aeb8c2] focus:border-[#8fb47e] focus:ring-2 focus:ring-[#8fb47e]/25"
-                    />
-                  </div>
-                ))}
-              </div>
-              <div className="mt-4 sm:col-span-2">
-                <label className="mb-2 block text-[12px] font-semibold text-[#485767]">
-                  Message
-                </label>
-                <textarea
-                  rows={4}
-                  placeholder="Tell us briefly what you'd like help with"
-                  className="w-full rounded-[0.625rem] border border-[#e4eaee] bg-white px-4 py-3 text-[13px] text-[#243a5f] outline-none placeholder:text-[#aeb8c2] focus:border-[#8fb47e] focus:ring-2 focus:ring-[#8fb47e]/25"
-                />
-              </div>
-              <a
-                href={clinicInfo.phoneHref}
-                className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-[0.625rem] bg-[#E12454] px-6 py-3.5 text-[14px] font-semibold text-white shadow-[0_12px_28px_rgba(225,36,84,0.28)] transition hover:bg-[#E12454]/90"
-              >
-                <CalendarDays className="h-4 w-4" />
-                Get appointment
-              </a>
+          <div className="mx-auto mt-12 grid max-w-250 gap-8 xl:grid-cols-[1.12fr_0.88fr] xl:items-start">
+            <div className="h-215 overflow-hidden rounded-[0.625rem] md:h-235 xl:h-255 [&_iframe]:h-full! [&_iframe]:min-h-0!">
+              <Cal
+                namespace="30min"
+                calLink="muhammad-abdullah-2bixqw/30min"
+                style={{ width: "100%", height: "100%", overflow: "hidden" }}
+                config={{
+                  layout: "month_view",
+                  useSlotsViewOnSmallScreen: true,
+                  theme: "light",
+                }}
+              />
             </div>
 
             <div className="flex flex-col gap-6">
-              <div className="rounded-[20px] p-7 text-white shadow-[0_22px_44px_rgba(120,160,110,0.35)] bg-[#8FB569]">
+              <div className="rounded-[20px] bg-[linear-gradient(145deg,#4f6840_0%,#6f8757_55%,#4f6840_100%)] p-7 text-white shadow-[0_24px_52px_rgba(94,115,72,0.48)]">
                 <h3 className="text-[26px] font-bold tracking-[-0.03em]">
                   Our contact info
                 </h3>
@@ -1001,7 +1132,7 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <div className="rounded-2xl bg-white p-6 shadow-[0_18px_36px_rgba(31,46,74,0.08)] ring-1 ring-[#edf1f3]">
+              <div className="rounded-2xl bg-[linear-gradient(180deg,#ffffff_0%,#f3f9ff_100%)] p-6 shadow-[0_20px_40px_rgba(31,46,74,0.14)] ring-1 ring-[#dbe8f6]">
                 <h3 className="text-[18px] font-bold text-[#1E4A8A]">
                   Why Choose us
                 </h3>
@@ -1011,9 +1142,14 @@ export default function HomePage() {
                     "Experienced practitioners",
                     "Natural, gentle remedies",
                     "Clear follow-up plan",
+                    "Family-friendly consultations",
+                    "Evidence-informed case review",
+                    "Customized care for all ages",
+                    "Transparent treatment guidance",
+                    "Convenient appointment scheduling",
                   ].map((item) => (
                     <div key={item} className="flex items-center gap-3">
-                      <div className="flex h-5 w-5 items-center justify-center rounded-full border border-[#8fb47e] text-[#8FB569]">
+                      <div className="flex h-5 w-5 items-center justify-center rounded-full border border-(--brand-green) text-(--brand-green)">
                         <Check className="h-3 w-3" strokeWidth={3} />
                       </div>
                       <p className="text-[13px] text-[#5a6876]">{item}</p>
@@ -1029,10 +1165,10 @@ export default function HomePage() {
       <section className="bg-white px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-295">
           <div className="text-center">
-            <div className="inline-flex items-center gap-2 rounded-full bg-[#FDF2F8] px-4 py-1.75 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#EC4899]">
+            <div className="inline-flex items-center gap-2 rounded-full bg-(--surface-mist) px-4 py-1.75 text-[10px] font-semibold uppercase tracking-[0.18em] text-(--brand-blue) ring-1 ring-[#d8e8fb] shadow-[0_8px_18px_rgba(30,74,138,0.16)]">
               <Package size={15} /> Our Products
             </div>
-            <h2 className="mt-5 text-[32px] font-bold leading-tight tracking-[-0.04em] sm:text-[44px] text-[#1E4A8A]">
+            <h2 className="mt-5 text-[32px] font-bold leading-tight tracking-[-0.04em] text-[#1E4A8A] sm:text-[44px]">
               Premium homeopathic remedies
             </h2>
             <p className="mx-auto mt-3 max-w-160 text-[15px] leading-[1.7] text-[#1E4A8A]">
@@ -1055,7 +1191,7 @@ export default function HomePage() {
                   onClick={() => setActiveProductFilter(filter)}
                   className={`rounded-lg px-4 py-2 font-semibold transition ${
                     active
-                      ? "bg-[#6ba86a] text-white shadow-[0_10px_20px_rgba(107,168,106,0.3)]"
+                      ? "bg-(--brand-green) text-white shadow-[0_10px_20px_rgba(94,115,72,0.3)]"
                       : "bg-white text-[#54606e] shadow-[0_4px_10px_rgba(0,0,0,0.05)] ring-1 ring-[#edf0f2]"
                   }`}
                 >
@@ -1065,11 +1201,23 @@ export default function HomePage() {
             })}
           </div>
 
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5">
-            {products.map((product) => (
+          {productsError ? (
+            <p className="mt-10 text-center text-[14px] text-[#d93025]">
+              {productsError}
+            </p>
+          ) : null}
+
+          {isLoadingProducts ? (
+            <p className="mt-10 text-center text-[14px] text-[#5a6876]">
+              Loading products...
+            </p>
+          ) : null}
+
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {visibleProducts.map((product) => (
               <article
-                key={product.title}
-                className="flex flex-col overflow-hidden rounded-[0.8rem] bg-white shadow-[0_8px_18px_rgba(32,49,77,0.1)] ring-1 ring-[#ebeff3]"
+                key={product.id}
+                className="flex flex-col overflow-hidden rounded-[0.8rem] bg-[linear-gradient(180deg,#ffffff_0%,#fafdff_100%)] shadow-[0_12px_24px_rgba(32,49,77,0.12)] ring-1 ring-[#e6edf5]"
               >
                 <div className="relative h-34 bg-[#f6f9fc]">
                   <Image
@@ -1081,12 +1229,14 @@ export default function HomePage() {
                   />
                   {product.badge ? (
                     <span
-                      className={`absolute left-2.5 top-2.5 rounded-full px-2 py-1 text-xs font-semibold leading-none ${product.badgeClass}`}
+                      className={`absolute left-2.5 top-2.5 rounded-full px-2 py-1 text-xs font-semibold leading-none ${
+                        product.badgeClass ?? "bg-[#E12454] text-white"
+                      }`}
                     >
                       {product.badge}
                     </span>
                   ) : null}
-                  <span className="absolute right-2.5 top-2.5 rounded-full bg-[#26B56A] px-2 py-1 text-xs font-semibold leading-none text-white">
+                  <span className="absolute right-2.5 top-2.5 rounded-full bg-(--brand-green) px-2 py-1 text-xs font-semibold leading-none text-white">
                     {product.stockLabel}
                   </span>
                 </div>
@@ -1118,16 +1268,31 @@ export default function HomePage() {
                     <span className="text-[#c3cad1] line-through">
                       {product.oldPrice}
                     </span>
-                    <span className="ml-auto rounded-full bg-[#E8F8E2] px-2 py-1 text-xs font-bold tracking-wide text-[#4EA63F]">
-                      {product.off}
-                    </span>
+                    {product.off ? (
+                      <span className="ml-auto rounded-full bg-(--surface-mint) px-2 py-1 text-xs font-bold tracking-wide text-(--brand-green)">
+                        {product.off}
+                      </span>
+                    ) : null}
                   </div>
                   <button
                     type="button"
-                    className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-md bg-[#E12454] px-3 py-2 text-xs font-semibold tracking-[0.02em] text-white transition hover:bg-[#E12454]/90"
+                    disabled={!product.price || product.id === lastAddedItemId}
+                    onClick={() =>
+                      addItem({
+                        id: product.id,
+                        title: product.title,
+                        imageSrc: product.imageSrc,
+                        unitPrice: parseMoneyLabel(product.price),
+                      })
+                    }
+                    className={`mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-md px-3 py-2 text-xs font-semibold tracking-[0.02em] text-white transition disabled:opacity-60 ${
+                      product.id === lastAddedItemId
+                        ? "bg-(--brand-green) hover:bg-(--brand-green)/90"
+                        : "btn-gradient-pink"
+                    }`}
                   >
                     <ShoppingCart className="h-4 w-4" />
-                    Add to Cart
+                    {product.id === lastAddedItemId ? "Added!" : "Add to Cart"}
                   </button>
                 </div>
               </article>
@@ -1149,8 +1314,8 @@ export default function HomePage() {
                 title: "Fast delivery",
                 text: "Reliable shipping on remedy orders.",
                 boxClass:
-                  "bg-[linear-gradient(180deg,#f4fff7_0%,#fbfffc_100%)]",
-                iconClass: "bg-[#eaf7ee] text-[#6ba86a]",
+                  "bg-[linear-gradient(180deg,var(--surface-mint)_0%,#fbfffc_100%)]",
+                iconClass: "bg-(--surface-mint) text-(--brand-green)",
               },
               {
                 icon: Sparkles,
@@ -1183,7 +1348,7 @@ export default function HomePage() {
           <div className="mt-10 text-center">
             <Link
               href="/products"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#E12454] px-6 py-3 text-[13px] font-semibold text-white shadow-[0_12px_28px_rgba(225,36,84,0.28)] transition hover:bg-[#E12454]/90"
+              className="btn-gradient-pink inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-[13px] font-semibold text-white transition"
             >
               View all products
               <ArrowRight className="h-4 w-4" />
@@ -1192,13 +1357,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-[#F9F9F9] px-4 py-20 sm:px-6 lg:px-8">
+      <section className="bg-[radial-gradient(circle_at_100%_0%,#ebf4ff_0%,transparent_35%),#f5f9fd] px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-295">
           <div className="text-center">
-            <div className="inline-flex items-center gap-2 rounded-full bg-[#FDF2F8] px-4 py-1.75 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#EC4899]">
+            <div className="inline-flex items-center gap-2 rounded-full bg-(--surface-link-hover) px-4 py-1.75 text-[10px] font-semibold uppercase tracking-[0.18em] text-(--brand-pink) ring-1 ring-[#f6dce7] shadow-[0_8px_18px_rgba(225,36,84,0.14)]">
               <Tag size={15} /> Latest insights
             </div>
-            <h2 className="mt-5 text-[32px] font-bold leading-tight tracking-[-0.04em] sm:text-[44px] text-[#1E4A8A]">
+            <h2 className="mt-5 text-[32px] font-bold leading-tight tracking-[-0.04em] text-[#1E4A8A] sm:text-[44px]">
               Health &amp; wellness blog
             </h2>
             <p className="mx-auto mt-3 max-w-155 text-[15px] leading-[1.7] text-[#1E4A8A]">
@@ -1206,64 +1371,98 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="mt-12 grid gap-8 md:grid-cols-2 xl:grid-cols-3">
-            {articles.map((post) => (
-              <article
-                key={post.title}
-                className="flex flex-col overflow-hidden rounded-2xl bg-white shadow-[0_14px_28px_rgba(32,49,77,0.08)] ring-1 ring-[#edf0f3]"
-              >
-                <div className="relative h-44 bg-[#eef2f6]">
-                  <Image
-                    src={post.imageSrc}
-                    alt=""
-                    fill
-                    className="object-cover object-center"
-                    sizes="(max-width: 1024px) 100vw, 380px"
-                  />
-                  <span className="absolute left-3 top-3 rounded-full bg-white/95 px-3 py-1.5 text-[10px] font-semibold text-[#5a6eb0] shadow-sm">
-                    {post.tag}
-                  </span>
-                </div>
-                <div className="flex flex-1 flex-col p-5">
-                  <div className="flex flex-wrap items-center gap-3 text-[11px] text-[#8994a1]">
-                    <span>{post.date}</span>
-                    <span className="h-1 w-1 rounded-full bg-[#b9c1ca]" />
-                    <span>{post.readTime}</span>
-                  </div>
-                  <h3 className="mt-3 flex-1 text-[22px] font-bold leading-tight tracking-[-0.03em] text-[#1e3d52]">
-                    {post.title}
-                  </h3>
-                  <p className="mt-3 text-[14px] leading-[1.7] text-[#6b7783]">
-                    {post.description}
-                  </p>
-                  <div className="mt-6 flex items-center justify-between border-t border-[#edf1f4] pt-4">
-                    <div className="flex items-center gap-2 text-[12px] font-medium text-[#35507a]">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#e8f2fb] text-[#5b86b4]">
-                        <Stethoscope className="h-3.5 w-3.5" strokeWidth={2} />
+          <div
+            ref={blogCarouselRef}
+            onScroll={updateBlogScrollButtons}
+            className="mt-8 flex snap-x snap-mandatory gap-8 overflow-x-hidden bg-transparent pb-2 scroll-smooth"
+          >
+            {wpArticlesError ? (
+              <p className="w-full text-center text-[14px] text-[#d93025]">
+                {wpArticlesError}
+              </p>
+            ) : null}
+
+            {isLoadingWpArticles
+              ? null
+              : wpArticles.map((post) => (
+                  <article
+                    key={post.title}
+                    className="flex w-full shrink-0 snap-start flex-col overflow-hidden rounded-2xl bg-[linear-gradient(180deg,#ffffff_0%,#fafdff_100%)] shadow-[0_14px_30px_rgba(31,48,75,0.1)] ring-1 ring-[#e7edf4] md:w-[calc((100%-2rem)/2)] xl:w-[calc((100%-4rem)/3)]"
+                  >
+                    <div className="relative h-44 bg-[#eef2f6]">
+                      <Image
+                        src={post.imageSrc}
+                        alt=""
+                        fill
+                        className="object-cover object-center"
+                        sizes="(max-width: 1024px) 100vw, 380px"
+                      />
+                      <span className="absolute left-3 top-3 rounded-full bg-white/95 px-3 py-1.5 text-[10px] font-semibold text-[#5a6eb0] shadow-sm">
+                        {post.tag}
                       </span>
-                      {post.author}
                     </div>
-                    <Link
-                      href={`/articles/${post.slug}`}
-                      className="inline-flex items-center gap-2 text-[12px] font-semibold text-[#6ba86a]"
-                    >
-                      Read more
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </Link>
-                  </div>
-                </div>
-              </article>
-            ))}
+                    <div className="flex flex-1 flex-col p-5">
+                      <div className="flex flex-wrap items-center gap-3 text-[11px] text-[#8994a1]">
+                        <span>{post.date}</span>
+                        <span className="h-1 w-1 rounded-full bg-[#b9c1ca]" />
+                        <span>{post.readTime}</span>
+                      </div>
+                      <h3 className="mt-3 flex-1 text-[22px] font-bold leading-tight tracking-[-0.03em] text-[#1e3d52]">
+                        {post.title}
+                      </h3>
+                      <p
+                        className="mt-3 text-[14px] leading-[1.7] text-[#6b7783]"
+                        style={{
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                        }}
+                      >
+                        {post.description}
+                      </p>
+                      <div className="mt-6 flex items-center justify-between border-t border-[#edf1f4] pt-4">
+                        <div className="flex items-center gap-2 text-[12px] font-medium text-[#35507a]">
+                          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#e8f2fb] text-[#5b86b4]">
+                            <Stethoscope
+                              className="h-3.5 w-3.5"
+                              strokeWidth={2}
+                            />
+                          </span>
+                          {post.author}
+                        </div>
+                        <Link
+                          href={`/articles/${post.slug}`}
+                          className="inline-flex items-center gap-2 text-[13px] font-semibold text-(--brand-green)"
+                        >
+                          Read article
+                          <ArrowRight className="h-3.5 w-3.5" />
+                        </Link>
+                      </div>
+                    </div>
+                  </article>
+                ))}
           </div>
 
-          <div className="mt-10 text-center">
-            <Link
-              href="/articles"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#E12454] px-6 py-3 text-[13px] font-semibold text-white shadow-[0_12px_28px_rgba(225,36,84,0.28)] transition hover:bg-[#E12454]/90"
+          <div className="mt-8 flex justify-center gap-2">
+            <button
+              type="button"
+              aria-label="Previous articles"
+              onClick={() => scrollBlogs("left")}
+              disabled={!canScrollBlogsLeft}
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-(--brand-pink) text-white shadow-[0_10px_24px_rgba(225,36,84,0.3)] hover:bg-[#c81f4b] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-(--brand-pink)"
             >
-              View all articles
-              <ArrowRight className="h-4 w-4" />
-            </Link>
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              aria-label="Next articles"
+              onClick={() => scrollBlogs("right")}
+              disabled={!canScrollBlogsRight}
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-(--brand-pink) text-white shadow-[0_10px_24px_rgba(225,36,84,0.3)] hover:bg-[#c81f4b] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-(--brand-pink)"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
           </div>
         </div>
       </section>

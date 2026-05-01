@@ -3,6 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import PageHero from "@/components/PageHero";
+import HealingCtaSection from "@/components/HealingCtaSection";
 import {
   PhoneCall,
   UserCheck,
@@ -65,6 +67,21 @@ const faqs = [
     question: "03. Is homeopathy safe for everyone?",
     answer:
       "Homeopathic remedies are generally gentle and commonly used across age groups when selected carefully as part of an appropriate treatment plan.",
+  },
+  {
+    question: "04. What conditions can homeopathy support?",
+    answer:
+      "Homeopathy is often used to support a wide range of concerns, including allergies, digestive discomfort, stress-related symptoms, skin issues, and recurring seasonal problems. Your practitioner will assess your case individually before recommending a plan.",
+  },
+  {
+    question: "05. How often are follow-up visits needed?",
+    answer:
+      "Follow-up frequency depends on your condition, response to treatment, and goals. Some patients need closer short-term reviews, while others move to wider check-ins once progress becomes stable.",
+  },
+  {
+    question: "06. Do you offer consultations for children and seniors?",
+    answer:
+      "Yes. Care is available for different age groups, including children and seniors, with treatment plans adapted to age, health history, and individual sensitivity.",
   },
 ];
 
@@ -140,26 +157,12 @@ const About = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   return (
-    <main className="min-h-screen bg-white text-[#2a3f52]">
-      <section className="relative">
-        <div className="relative min-h-[min(320px,46vh)] w-full overflow-hidden bg-[#7BB153]">
-          <div className="relative z-10 mx-auto flex min-h-[min(320px,46vh)] max-w-325 items-center justify-center px-4 py-10 text-center sm:px-6 lg:px-8">
-            <div className="flex max-w-170 flex-col items-center text-white">
-              <p className="text-sm font-medium text-white">
-                Home {">"} About-Us
-              </p>
-              <h1 className="mt-4 text-[32px] font-black uppercase leading-[1.05] tracking-[-0.03em] sm:text-[42px] lg:text-[50px]">
-                Dedicated to Your Holistic Health Journey
-              </h1>
-              <p className="mx-auto mt-5 max-w-120 text-[18px] font-semibold leading-snug">
-                Providing compassionate, professional homeopathic care rooted in
-                natural healing principles and backed by decades of
-                international experience.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+    <main className="min-h-screen bg-white text-(--text-body)">
+      <PageHero
+        breadcrumb="Home > About-Us"
+        title="Dedicated to Your Holistic Health Journey"
+        description="Providing compassionate, professional homeopathic care rooted in natural healing principles and backed by decades of international experience."
+      />
 
       <section className="bg-white px-4 pb-20 pt-52 sm:px-6 lg:px-8 lg:pt-32 overflow-x-clip">
         <div className="mx-auto grid max-w-295 gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
@@ -179,7 +182,7 @@ const About = () => {
             <p className="pointer-events-none -z-10 select-none text-[5.5rem] sm:text-[8rem] lg:text-[11rem] font-bold tracking-widest text-transparent bg-clip-text bg-linear-to-b from-[#F1F2F3] via-[#F1F2F3]/30 to-transparent absolute left-1/2 -translate-x-1/2 -top-25">
               About
             </p>
-            <h2 className="mt-3 text-[28px] font-bold leading-tight tracking-[-0.03em] sm:text-[36px] text-[#E12454]">
+            <h2 className="mt-3 text-[28px] font-bold leading-tight tracking-[-0.03em] text-(--brand-pink) sm:text-[36px]">
               Dr. Nasreen Kausar
             </h2>
             <p className="mt-6 text-[15px] leading-[1.75] text-[#5a6772]">
@@ -204,15 +207,15 @@ const About = () => {
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-6">
               <Link
-                href="/contact-us"
-                className="inline-flex items-center gap-3 rounded-xl bg-[#E12454] px-6 py-3 text-[14px] font-semibold text-white transition hover:bg-[#E12454]/90"
+                href="/contact-us#appointment"
+                className="inline-flex items-center gap-3 rounded-xl bg-(--brand-pink) px-6 py-3 text-[14px] font-semibold text-white transition hover:bg-(--brand-pink)/90"
               >
                 Get Appointment
                 <span className="text-white/90">|</span>
                 <span className="text-[18px] leading-none">+</span>
               </Link>
               <div className="inline-flex items-center gap-2 text-lg font-bold text-[#2a4a66]">
-                <span className="text-[#E12454]">
+                <span className="text-(--brand-pink)">
                   <PhoneCall size={30} />
                 </span>
                 604 (613) 8111
@@ -222,13 +225,13 @@ const About = () => {
         </div>
       </section>
 
-      <section className="bg-[#F9F9F9] px-4 py-16 sm:px-6 lg:px-8 ">
+      <section className="bg-(--surface-soft) px-4 py-16 sm:px-6 lg:px-8 ">
         <div className="mx-auto max-w-295">
           <div className="text-center">
-            <h2 className="text-[32px] font-bold leading-tight tracking-[-0.04em] text-[#1E4A8A] sm:text-[44px]">
+            <h2 className="text-[32px] font-bold leading-tight tracking-[-0.04em] text-(--brand-blue) sm:text-[44px]">
               Professional Credentials
             </h2>
-            <p className="mx-auto mt-3 max-w-160 text-[15px] leading-[1.7] text-[#1E4A8A]">
+            <p className="mx-auto mt-3 max-w-160 text-[15px] leading-[1.7] text-(--brand-blue)">
               Extensive training and recognized qualifications in homeopathic
               medicine
             </p>
@@ -239,7 +242,7 @@ const About = () => {
               ({ title, description, icon: Icon, iconClass }) => (
                 <article
                   key={title}
-                  className={`flex flex-col items-center justify-center text-center rounded-xl border-b-4 border-[#7BB153] bg-white px-4 py-5 shadow-xl`}
+                  className={`flex flex-col items-center justify-center text-center rounded-xl border-b-4 border-(--hero-green) bg-white px-4 py-5 shadow-xl`}
                 >
                   <div
                     className={`flex h-15 w-15 items-center justify-center rounded-full ${iconClass}`}
@@ -262,10 +265,10 @@ const About = () => {
       <section className="bg-linear-to-r from-[#DBEAFE] to-[#E9FED3] px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-200">
           <div className="text-center">
-            <h2 className="text-[32px] font-bold leading-tight tracking-[-0.04em] text-[#1E4A8A] sm:text-[44px]">
+            <h2 className="text-[32px] font-bold leading-tight tracking-[-0.04em] text-(--brand-blue) sm:text-[44px]">
               My Journey
             </h2>
-            <p className="mx-auto mt-3 max-w-160 text-[15px] leading-[1.7] text-[#1E4A8A]">
+            <p className="mx-auto mt-3 max-w-160 text-[15px] leading-[1.7] text-(--brand-blue)">
               A commitment to continuous learning and excellence
             </p>
           </div>
@@ -297,10 +300,10 @@ const About = () => {
       <section className="bg-white px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-245">
           <div className="text-center">
-            <h2 className="text-[32px] font-bold leading-tight tracking-[-0.04em] text-[#1E4A8A] sm:text-[44px]">
+            <h2 className="text-[32px] font-bold leading-tight tracking-[-0.04em] text-(--brand-blue) sm:text-[44px]">
               Professional Affiliations
             </h2>
-            <p className="mx-auto mt-3 max-w-160 text-[15px] leading-[1.7] text-[#1E4A8A]">
+            <p className="mx-auto mt-3 max-w-160 text-[15px] leading-[1.7] text-(--brand-blue)">
               Actively engaged in the homeopathic community
             </p>
           </div>
@@ -334,44 +337,7 @@ const About = () => {
         </div>
       </section>
 
-      <section className="relative min-h-80 overflow-hidden py-24 sm:py-28">
-        <Image
-          src="/home/choosing-bg.jpg"
-          alt=""
-          fill
-          className="object-cover object-center"
-          sizes="100vw"
-        />
-        <div className="relative z-10 mx-auto max-w-230 px-4 text-center sm:px-6">
-          <p
-            className="text-[20px] font-medium leading-normal text-white sm:text-[26px] lg:text-[30px]"
-            style={{
-              textShadow:
-                "0 2px 16px rgba(0,0,0,0.65), 0 1px 4px rgba(0,0,0,0.9)",
-            }}
-          >
-            Choosing Bless Homeopathic means choosing a path to better health
-            guided by expertise, compassion, and a commitment to your
-            well-being. Let us help you on your journey to holistic healing!
-          </p>
-          <p
-            className="mx-auto mt-6 max-w-xl text-[13px] font-medium text-white sm:text-[15px]"
-            style={{ textShadow: "0 2px 12px rgba(0,0,0,0.7)" }}
-          >
-            We&apos;ve 25 Years of experience in Medical Services.
-          </p>
-          <div className="mt-8 flex justify-center">
-            <Link
-              href="/contact-us"
-              className="inline-flex items-center gap-3 rounded-xl bg-[#E12454] px-8 py-3.5 text-[14px] font-semibold text-white shadow-[0_12px_28px_rgba(225,36,84,0.35)] transition hover:bg-[#E12454]/90"
-            >
-              Contact Us
-              <span className="text-white/90">|</span>
-              <span className="text-[18px] leading-none">+</span>
-            </Link>
-          </div>
-        </div>
-      </section>
+      <HealingCtaSection />
 
       <section className="bg-white px-4 py-20 sm:px-6 lg:px-8 overflow-x-clip">
         <div className="mx-auto grid max-w-295 gap-12 xl:grid-cols-[0.98fr_1.02fr]">
@@ -379,7 +345,7 @@ const About = () => {
             <p className="pointer-events-none -z-10 select-none text-[5.5rem] sm:text-[8rem] lg:text-[11rem] font-bold tracking-widest text-transparent bg-clip-text bg-linear-to-b from-[#F1F2F3] via-[#F1F2F3]/30 to-transparent absolute left-1/2 -translate-x-1/2 -top-30">
               Faqs
             </p>
-            <p className="text-[13px] font-semibold uppercase tracking-[0.12em] text-[#E12454]">
+            <p className="text-[13px] font-semibold uppercase tracking-[0.12em] text-(--brand-pink)">
               Why choose us
             </p>
             <h2 className="mt-3 max-w-130 text-[32px] font-bold leading-[1.08] tracking-[-0.04em] sm:text-[44px]">
@@ -397,7 +363,7 @@ const About = () => {
               {whyChooseItems.map(({ title, text, icon: Icon }) => (
                 <div key={title} className="flex gap-4">
                   <div>
-                    <Icon className="mt-1 text-[#E12454]" size={25} />
+                    <Icon className="mt-1 text-(--brand-pink)" size={25} />
                   </div>
                   <div>
                     <h3 className="text-[17px] font-semibold text-[#1e3d52]">

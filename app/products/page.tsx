@@ -10,12 +10,13 @@ import {
   Leaf,
   Award,
   Filter,
-  ArrowRight,
 } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { parseMoneyLabel, useCart } from "@/components/cart/CartProvider";
 
 type ProductCardData = {
+  id: number;
   badge?: string;
   badgeClass?: string;
   stockLabel: string;
@@ -26,6 +27,7 @@ type ProductCardData = {
   off: string;
   rating: string;
   imageSrc: string;
+  categories: string[];
 };
 
 const productFilters = [
@@ -36,106 +38,7 @@ const productFilters = [
   "Wellness",
 ];
 
-const products: ProductCardData[] = [
-  {
-    badge: "Bestseller",
-    badgeClass: "bg-[#E12454] text-white",
-    stockLabel: "In Stock",
-    title: "Arnica Montana 200CH",
-    description:
-      "Effective for trauma, bruises, muscle soreness, and post-surgical recovery.",
-    price: "$299",
-    oldPrice: "$399",
-    off: "25% OFF",
-    rating: "4.8 (245)",
-    imageSrc: "/ecommerce/product-01.jpg",
-  },
-  {
-    stockLabel: "In Stock",
-    title: "Immune Boost Formula",
-    description:
-      "Natural immunity enhancer with Echinacea and Thuja complex for strong defense.",
-    price: "$549",
-    oldPrice: "$699",
-    off: "21% OFF",
-    rating: "4.9 (389)",
-    imageSrc: "/ecommerce/product-02.jpg",
-  },
-  {
-    badge: "Popular",
-    badgeClass: "bg-[#E12454] text-white",
-    stockLabel: "In Stock",
-    title: "Stress Relief Complex",
-    description:
-      "Gentle homeopathic blend for anxiety, stress, and emotional balance.",
-    price: "$449",
-    oldPrice: "$549",
-    off: "18% OFF",
-    rating: "4.7 (178)",
-    imageSrc: "/ecommerce/product-03.jpg",
-  },
-  {
-    badge: "New",
-    badgeClass: "bg-[#E12454] text-white",
-    stockLabel: "In Stock",
-    title: "Rhus Tox 30CH",
-    description:
-      "Relief for joint pain, arthritis, and rheumatic conditions naturally.",
-    price: "$249",
-    oldPrice: "$329",
-    off: "24% OFF",
-    rating: "4.6 (156)",
-    imageSrc: "/ecommerce/product-04.jpg",
-  },
-  {
-    badge: "Bestseller",
-    badgeClass: "bg-[#E12454] text-white",
-    stockLabel: "In Stock",
-    title: "Digestive Wellness Kit",
-    description:
-      "Complete digestive support with Nux Vomica, Lycopodium, and Carbo Veg.",
-    price: "$799",
-    oldPrice: "$999",
-    off: "20% OFF",
-    rating: "4.9 (412)",
-    imageSrc: "/ecommerce/product-05.jpg",
-  },
-  {
-    stockLabel: "In Stock",
-    title: "Pulsatilla 200CH",
-    description:
-      "Women's health remedy for hormonal balance and menstrual wellness.",
-    price: "$349",
-    oldPrice: "$449",
-    off: "22% OFF",
-    rating: "4.8 (267)",
-    imageSrc: "/ecommerce/product-06.jpg",
-  },
-  {
-    badge: "Popular",
-    badgeClass: "bg-[#E12454] text-white",
-    stockLabel: "In Stock",
-    title: "Children's Health Kit",
-    description:
-      "Safe and gentle remedies for common childhood ailments and immunity.",
-    price: "$649",
-    oldPrice: "$799",
-    off: "19% OFF",
-    rating: "4.9 (523)",
-    imageSrc: "/ecommerce/product-07.jpg",
-  },
-  {
-    stockLabel: "In Stock",
-    title: "Sleep Support Formula",
-    description:
-      "Natural sleep aid with Coffea Cruda and Passiflora for restful nights.",
-    price: "$399",
-    oldPrice: "$499",
-    off: "20% OFF",
-    rating: "4.7 (198)",
-    imageSrc: "/ecommerce/product-08.jpg",
-  },
-];
+const FALLBACK_PRODUCTS: ProductCardData[] = [];
 
 const whyShopBullets = [
   {
@@ -181,13 +84,61 @@ const shopperAssurances = [
 export default function EcommercePage() {
   const [activeProductFilter, setActiveProductFilter] =
     useState("All Products");
+  const { addItem, lastAddedItemId } = useCart();
+  const [products, setProducts] =
+    useState<ProductCardData[]>(FALLBACK_PRODUCTS);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+  const [productsError, setProductsError] = useState("");
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadProducts() {
+      try {
+        setIsLoadingProducts(true);
+        setProductsError("");
+        const response = await fetch("/api/products", {
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error("Could not load products");
+        }
+
+        const data = (await response.json()) as ProductCardData[];
+        setProducts(data);
+      } catch (error) {
+        if ((error as Error).name !== "AbortError") {
+          setProductsError(
+            "We are unable to load products right now. Please try again shortly.",
+          );
+          setProducts(FALLBACK_PRODUCTS);
+        }
+      } finally {
+        setIsLoadingProducts(false);
+      }
+    }
+
+    loadProducts();
+    return () => controller.abort();
+  }, []);
+
+  const visibleProducts = products.filter((product) => {
+    if (activeProductFilter === "All Products") return true;
+    return product.categories.some(
+      (category) =>
+        category.toLowerCase() === activeProductFilter.toLowerCase(),
+    );
+  });
   return (
     <main className="min-h-screen bg-white">
       <section className="relative text-white">
-        <div className="relative min-h-[min(320px,46vh)] w-full overflow-hidden bg-[#7BB153]">
+        <div className="relative min-h-[min(320px,46vh)] w-full overflow-hidden bg-(--brand-green)">
           <div className="relative z-10 mx-auto flex min-h-[min(320px,46vh)] max-w-325 items-center justify-center px-4 py-10 text-center sm:px-6 lg:px-8">
             <div className="flex max-w-170 flex-col items-center text-white">
-              <p className="text-sm font-medium text-white">Home {">"} Products</p>
+              <p className="text-sm font-medium text-white">
+                Home {">"} Products
+              </p>
               <h1 className="mt-4 text-[32px] font-black uppercase leading-[1.05] tracking-[-0.03em] sm:text-[42px] lg:text-[50px]">
                 Our Products
               </h1>
@@ -257,7 +208,7 @@ export default function EcommercePage() {
                   onClick={() => setActiveProductFilter(filter)}
                   className={`rounded-lg px-4 py-2 font-semibold transition ${
                     active
-                      ? "bg-[#6ba86a] text-white shadow-[0_10px_20px_rgba(107,168,106,0.3)]"
+                      ? "bg-(--brand-green) text-white shadow-[0_10px_20px_rgba(94,115,72,0.3)]"
                       : "bg-white text-[#54606e] shadow-[0_4px_10px_rgba(0,0,0,0.05)] ring-1 ring-[#edf0f2]"
                   }`}
                 >
@@ -267,10 +218,22 @@ export default function EcommercePage() {
             })}
           </div>
 
+          {productsError ? (
+            <p className="mt-10 text-center text-[14px] text-[#d93025]">
+              {productsError}
+            </p>
+          ) : null}
+
+          {isLoadingProducts ? (
+            <p className="mt-10 text-center text-[14px] text-[#5a6876]">
+              Loading products...
+            </p>
+          ) : null}
+
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5">
-            {products.map((product) => (
+            {visibleProducts.map((product) => (
               <article
-                key={product.title}
+                key={product.id}
                 className="flex flex-col overflow-hidden rounded-[0.8rem] bg-white shadow-[0_8px_18px_rgba(32,49,77,0.1)] ring-1 ring-[#ebeff3]"
               >
                 <div className="relative h-34 bg-[#f6f9fc]">
@@ -283,12 +246,14 @@ export default function EcommercePage() {
                   />
                   {product.badge ? (
                     <span
-                      className={`absolute left-2.5 top-2.5 rounded-full px-2 py-1 text-xs font-semibold leading-none ${product.badgeClass}`}
+                      className={`absolute left-2.5 top-2.5 rounded-full px-2 py-1 text-xs font-semibold leading-none ${
+                        product.badgeClass ?? "bg-[#E12454] text-white"
+                      }`}
                     >
                       {product.badge}
                     </span>
                   ) : null}
-                  <span className="absolute right-2.5 top-2.5 rounded-full bg-[#26B56A] px-2 py-1 text-xs font-semibold leading-none text-white">
+                  <span className="absolute right-2.5 top-2.5 rounded-full bg-(--brand-green) px-2 py-1 text-xs font-semibold leading-none text-white">
                     {product.stockLabel}
                   </span>
                 </div>
@@ -320,30 +285,35 @@ export default function EcommercePage() {
                     <span className="text-[#c3cad1] line-through">
                       {product.oldPrice}
                     </span>
-                    <span className="ml-auto rounded-full bg-[#E8F8E2] px-2 py-1 text-xs font-bold tracking-wide text-[#4EA63F]">
-                      {product.off}
-                    </span>
+                    {product.off ? (
+                      <span className="ml-auto rounded-full bg-(--surface-mint) px-2 py-1 text-xs font-bold tracking-wide text-(--brand-green)">
+                        {product.off}
+                      </span>
+                    ) : null}
                   </div>
                   <button
                     type="button"
-                    className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-md bg-[#E12454] px-3 py-2 text-xs font-semibold tracking-[0.02em] text-white transition hover:bg-[#E12454]/90"
+                    disabled={!product.price || product.id === lastAddedItemId}
+                    onClick={() =>
+                      addItem({
+                        id: product.id,
+                        title: product.title,
+                        imageSrc: product.imageSrc,
+                        unitPrice: parseMoneyLabel(product.price),
+                      })
+                    }
+                    className={`mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-md px-3 py-2 text-xs font-semibold tracking-[0.02em] text-white transition disabled:opacity-60 ${
+                      product.id === lastAddedItemId
+                        ? "bg-(--brand-green) hover:bg-(--brand-green)/90"
+                        : "bg-[#E12454] hover:bg-[#E12454]/90"
+                    }`}
                   >
                     <ShoppingCart className="h-4 w-4" />
-                    Add to Cart
+                    {product.id === lastAddedItemId ? "Added!" : "Add to Cart"}
                   </button>
                 </div>
               </article>
             ))}
-          </div>
-
-          <div className="mt-10 text-center">
-            <button
-              type="button"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#E12454] px-6 py-3 text-[13px] font-semibold text-white shadow-[0_12px_28px_rgba(225,36,84,0.28)] transition hover:bg-[#E12454]/90"
-            >
-              View all products
-              <ArrowRight className="h-4 w-4" />
-            </button>
           </div>
         </div>
       </section>
