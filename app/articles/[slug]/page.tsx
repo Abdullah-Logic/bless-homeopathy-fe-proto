@@ -9,11 +9,15 @@ type ArticlePageProps = {
   params: Promise<{ slug: string }>;
 };
 
-const WP_BASE_URL = process.env.WP_API_BASE_URL ?? "https://testing.ijsigma.org";
+const WP_BASE_URL = process.env.WP_API_BASE_URL;
 
 export default async function ArticleDetailPage({
   params,
 }: ArticlePageProps) {
+  if (!WP_BASE_URL) {
+    throw new Error("Missing required environment variable: WP_API_BASE_URL");
+  }
+
   const resolvedParams = await params;
   const { slug } = resolvedParams;
   const article = await fetchWPArticleBySlug({
